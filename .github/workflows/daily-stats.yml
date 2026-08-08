@@ -1,0 +1,60 @@
+name: Daily Stats Collection
+
+# Runs every day to collect Cloudflare request stats for all our games and
+# publish the dashboard to GitHub Pages. Public repo → free Actions minutes.
+
+on:
+  schedule:
+    - cron: "0 6 * * *"   # 06:00 UTC daily (Cloudflare has finalized previous-day data)
+  workflow_dispatch:       # manual trigger
+
+permissions:
+  contents: write          # commit data/history.json + index.html
+  pages: write             # deploy to GitHub Pages
+  id-token: write          # required by deploy-pages
+
+concurrency:
+  group: daily-stats
+  cancel-in-progress: false
+
+jobs:
+  collect-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Collect Cloudflare stats
+        run: node scripts/collect.mjs
+        env:
+          CF_ACCOUNT1: ${{ secrets.CF_ACCOUNT1 }}
+          CF_TOKEN_ACCOUNT1: ${{ secrets.CF_TOKEN_ACCOUNT1 }}
+          CF_ACCOUNT2: ${{ secrets.CF_ACCOUNT2 }}
+          CF_TOKEN_ACCOUNT2: ${{ secrets.CF_TOKEN_ACCOUNT2 }}
+
+      - name: Generate dashboard with big-pickle
+        run: node scripts/generate.mjs
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+
+      - name: Commit updated stats + dashboard
+        run: |
+          git config user.name "stats-bot"
+          git config user.email "stats-bot@users.noreply.github.com"
+          git add data/history.json index.html
+          git diff --cached --quiet || git commit -m "📊 Daily stats update $(date -u +%F)"
+          git push
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4

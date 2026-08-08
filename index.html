@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Statistics Dashboard</title>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        :root {
+            --bg: #0b1220;
+            --bg-card: rgba(255, 255, 255, 0.045);
+            --bg-card-hover: rgba(255, 255, 255, 0.07);
+            --border: rgba(255, 255, 255, 0.08);
+            --gold: #fbbf24;
+            --gold-dark: #f59e0b;
+            --emerald: #10b981;
+            --emerald-bright: #34d399;
+            --text: #e2e8f0;
+            --muted: #64748b;
+            --up: #4ade80;
+            --down: #f87171;
+            --radius: 16px;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: radial-gradient(ellipse at 20% 0%, rgba(16, 185, 129, 0.12) 0%, transparent 55%),
+                radial-gradient(ellipse at 90% 10%, rgba(245, 158, 11, 0.08) 0%, transparent 50%),
+                var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+        .dashboard {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 32px 24px 48px;
+        }
+        header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+        }
+        header h1 {
+            font-size: 1.9rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, #fff 30%, var(--gold) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        header .emoji {
+            font-size: 2.2rem;
+        }
+        .updated {
+            margin-left: auto;
+            font-size: 0.85rem;
+            color: var(--muted);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            border-radius: 999px;
+        }
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 36px;
+        }
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 22px 24px;
+            backdrop-filter: blur(6px);
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            background: var(--bg-card-hover);
+        }
+        .card .label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .card .value {
+            font-size: 2.1rem;
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+        }
+        .card .sub {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-top: 6px;
+        }
+        .card .value.gold {
+            color: var(--gold);
+        }
+        .card .value.emerald {
+            color: var(--emerald-bright);
+        }
+        .section {
+            margin-top: 40px;
+        }
+        .section-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: -0.01em;
+        }
+        .section-title .bar {
+            width: 4px;
+            height: 20px;
+            border-radius: 4px;
+            background: linear-gradient(180deg, var(--gold), var(--emerald));
+        }
+        .table-wrapper {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow-x: auto;
+            backdrop-filter: blur(6px);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+            min-width: 1000px;
+        }
+        thead th {
+            text-align: right;
+            padding: 14px 16px;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--muted);
+            border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.02);
+            white-space: nowrap;
+            font-weight: 700;
+        }
+        thead th:first-child {
+            text-align: left;
+        }
+        tbody td {
+            padding: 12px 16px;
+            text-align: right;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+        tbody td:first-child {
+            text-align: left;
+            font-weight: 600;
+        }
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+        tbody tr {
+            transition: background 0.15s ease;
+        }
+        tbody tr:hover {
+            background: rgba(255, 255, 255, 0.035);
+        }
+        tr.game {
+            background: rgba(251, 191, 36, 0.055);
+        }
+        tr.game:hover {
+            background: rgba(251, 191, 36, 0.1);
+        }
+        tr.infra {
+            opacity: 0.5;
+        }
+        tr.infra:hover {
+            opacity: 0.85;
+        }
+        .service-cell {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .game-icon {
+            font-size: 1rem;
+        }
+        .platform-badge {
+            font-size: 0.68rem;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+            padding: 2px 6px;
+            margin-left: 6px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .account {
+            font-family: "SF Mono", "Cascadia Code", Consolas, monospace;
+            font-size: 0.78rem;
+            color: var(--muted);
+        }
+        .trend-up {
+            color: var(--up);
+            font-weight: 700;
+        }
+        .trend-down {
+            color: var(--down);
+            font-weight: 700;
+        }
+        .trend-flat {
+            color: var(--muted);
+        }
+        .bars {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .bar-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .bar-label {
+            width: 210px;
+            text-align: right;
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-shrink: 0;
+        }
+        .bar-track {
+            flex: 1;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            background: linear-gradient(90deg, var(--emerald), var(--gold));
+            min-width: 2px;
+            transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .bar-value {
+            width: 110px;
+            text-align: right;
+            font-size: 0.85rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            flex-shrink: 0;
+            color: var(--text);
+        }
+        .bar-note {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-top: 12px;
+        }
+        .trending-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+        }
+        .trending-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px 22px;
+            backdrop-filter: blur(6px);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+        .trending-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--gold), var(--emerald));
+        }
+        .trending-card .rank {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            font-weight: 700;
+        }
+        .trending-card .name {
+            font-size: 1.05rem;
+            font-weight: 700;
+        }
+        .trending-card .delta {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--up);
+        }
+        .trending-card .from-to {
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+        footer {
+            margin-top: 56px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            font-size: 0.82rem;
+            color: var(--muted);
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--muted);
+            font-size: 1.1rem;
+        }
+        @media (max-width: 600px) {
+            .dashboard {
+                padding: 20px 14px 36px;
+            }
+            .bar-label {
+                width: 110px;
+                font-size: 0.72rem;
+            }
+            .bar-value {
+                width: 80px;
+                font-size: 0.75rem;
+            }
+            header .updated {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard" id="dashboard">
+        <header>
+            <span class="emoji">🎮</span>
+            <h1>Game Statistics Dashboard</h1>
+            <span class="updated" id="updatedLabel"></span>
+        </header>
+        <div id="content"></div>
+    </div>
+
+    <script>
+        const DATA = {"updatedAt":"2026-08-08T10:12:01.921Z","services":[{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"trivia-rumble-elite","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":145,"2026-08-08":17951}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"snakeworld1","platform":"worker","kind":"worker","daily":{"2026-08-06":8137,"2026-08-07":4,"2026-08-08":2697}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"arrow-blast","platform":"pages","kind":"pages","daily":{"2026-08-06":5988,"2026-08-07":846,"2026-08-08":219}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"pop-party","platform":"pages","kind":"pages","daily":{"2026-08-06":3145,"2026-08-07":9,"2026-08-08":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"discord-activity-test","platform":"pages","kind":"pages","daily":{"2026-08-06":2373,"2026-08-07":160,"2026-08-08":24}},{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"dice-arena","platform":"worker","kind":"worker","daily":{"2026-08-06":782,"2026-08-07":908,"2026-08-08":279}},{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"bible-trivia","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":1425}},{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"bluff-dice","platform":"worker","kind":"worker","daily":{"2026-08-06":111,"2026-08-07":238,"2026-08-08":5}},{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"opencode-proxy","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":12,"2026-08-08":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"youtrivia","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":7,"2026-08-08":2}},{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"audiobooks","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0}},{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"quran-trivia","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0}},{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"youstream-proxy","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"bible-game-telegram","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"casino","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"pop-party","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"pop-the-balloon","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"snakeworld1-telegram-bot","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"trivia-rumble-3","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"voice-vibes","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"wstest-probe2","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"bible-game","platform":"pages","kind":"pages","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"casino","platform":"pages","kind":"pages","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"voice-vibes","platform":"pages","kind":"pages","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"hindsight","platform":"pages","kind":"pages","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0}}]};
+
+        const fmt = (n) => Number(n).toLocaleString('en-US');
+        const GAME_RE = /(trivia|bible|quran|dice|bluff|snake|pop|casino|voice|youtrivia|game|blast|balloon)/i;
+        const isGame = (s) => GAME_RE.test(s.service);
+
+        const allDates = [...new Set(DATA.services.flatMap(s => Object.keys(s.daily)))].sort();
+        const lastDate = allDates[allDates.length - 1];
+        const prevDate = allDates[allDates.length - 2];
+
+        const services = DATA.services.map(s => {
+            const total = Object.values(s.daily).reduce((a, b) => a + b, 0);
+            const last = s.daily[lastDate] || 0;
+            const prev = prevDate ? (s.daily[prevDate] || 0) : null;
+            const delta = prev === null ? null : last - prev;
+            return { ...s, total, last, prev, delta };
+        });
+
+        const totalLastDay = services.reduce((sum, s) => sum + s.last, 0);
+        const totalAllTime = services.reduce((sum, s) => sum + s.total, 0);
+        const topService = services.reduce((a, b) => b.total > a.total ? b : a);
+
+        document.getElementById('updatedLabel').textContent = `Updated ${DATA.updatedAt}`;
+
+        const content = document.getElementById('content');
+
+        if (services.length === 0 || totalAllTime === 0) {
+            content.innerHTML = `<div class="no-data">🤝 No data collected yet</div>`;
+        } else {
+            // Stat cards
+            const cards = `
+                <div class="cards">
+                    <div class="card">
+                        <div class="label">Requests &mdash; Last Day</div>
+                        <div class="value emerald">${fmt(totalLastDay)}</div>
+                        <div class="sub">${lastDate}</div>
+                    </div>
+                    <div class="card">
+                        <div class="label">Requests &mdash; All Time</div>
+                        <div class="value">${fmt(totalAllTime)}</div>
+                        <div class="sub">${allDates.length} days tracked</div>
+                    </div>
+                    <div class="card">
+                        <div class="label">Services Tracked</div>
+                        <div class="value gold">${fmt(services.length)}</div>
+                        <div class="sub">${services.filter(isGame).length} games · ${services.filter(s => !isGame(s)).length} infrastructure</div>
+                    </div>
+                    <div class="card">
+                        <div class="label">Top Service</div>
+                        <div class="value" style="font-size:1.3rem;">🎮 ${topService.service}</div>
+                        <div class="sub">${fmt(topService.total)} total requests</div>
+                    </div>
+                </div>
+            `;
+
+            // Table
+            const sorted = [...services].sort((a, b) => b.total - a.total);
+            const rows = sorted.map(s => {
+                const game = isGame(s);
+                const cls = game ? 'game' : 'infra';
+                const icon = game ? '🎮' : '🔧';
+                const trendCell = (() => {
+                    if (s.delta === null || s.delta === 0) return '<span class="trend-flat">—</span>';
+                    if (s.delta > 0) return `<span class="trend-up">▲ +${fmt(s.delta)}</span>`;
+                    return `<span class="trend-down">▼ ${fmt(s.delta)}</span>`;
+                })();
+                const dailyCells = allDates.map(d => `<td>${fmt(s.daily[d] || 0)}</td>`).join('');
+                const shortAccount = s.account.slice(0, 8) + '…';
+                return `
+                    <tr class="${cls}">
+                        <td>
+                            <span class="service-cell">
+                                <span class="game-icon">${icon}</span>
+                                <span>${s.service}</span>
+                                <span class="platform-badge">${s.platform}</span>
+                            </span>
+                        </td>
+                        <td class="account" title="${s.account}">${shortAccount}</td>
+                        <td>${s.platform}</td>
+                        ${dailyCells}
+                        <td><strong>${fmt(s.total)}</strong></td>
+                        <td>${trendCell}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            const dateHeaders = allDates.map(d => `<th>${d.slice(5)}</th>`).join('');
+
+            const table = `
+                <div class="section">
+                    <div class="section-title"><span class="bar"></span> Request Volume by Service</div>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Service</th>
+                                    <th>Account</th>
+                                    <th>Platform</th>
+                                    ${dateHeaders}
+                                    <th>Total</th>
+                                    <th>Trend</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rows}</tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+
+            // Bar chart
+            const nonZero = sorted.filter(s => s.total > 0);
+            const maxTotal = nonZero[0] ? nonZero[0].total : 1;
+            const bars = nonZero.map(s => {
+                const pct = Math.max(2, (s.total / maxTotal) * 100);
+                return `
+                    <div class="bar-row">
+                        <div class="bar-label" title="${s.service}">${isGame(s) ? '🎮' : '🔧'} ${s.service}</div>
+                        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+                        <div class="bar-value">${fmt(s.total)}</div>
+                    </div>
+                `;
+            }).join('');
+            const zeroCount = sorted.length - nonZero.length;
+
+            const barChart = `
+                <div class="section">
+                    <div class="section-title"><span class="bar"></span> Rankings — Total Requests</div>
+                    <div class="bars">${bars}</div>
+                    ${zeroCount > 0 ? `<div class="bar-note">${zeroCount} service(s) with zero requests omitted.</div>` : ''}
+                </div>
+            `;
+
+            // Trending
+            const trending = sorted
+                .filter(s => s.delta !== null)
+                .sort((a, b) => (b.delta || 0) - (a.delta || 0))
+                .slice(0, 3);
+
+            const trendingCards = trending.map((s, i) => `
+                <div class="trending-card">
+                    <div class="rank">#${i + 1} · ${isGame(s) ? 'Game' : 'Infrastructure'}</div>
+                    <div class="name">🎮 ${s.service}</div>
+                    <div class="delta">▲ +${fmt(s.delta)}</div>
+                    <div class="from-to">${prevDate} → ${lastDate} · ${fmt(s.prev || 0)} → ${fmt(s.last)}</div>
+                </div>
+            `).join('');
+
+            const trendingSection = `
+                <div class="section">
+                    <div class="section-title"><span class="bar"></span> 🔥 Trending — Biggest Growth (${prevDate} → ${lastDate})</div>
+                    <div class="trending-grid">${trendingCards || '<p class="bar-note">No trend data available.</p>'}</div>
+                </div>
+            `;
+
+            content.innerHTML = cards + table + barChart + trendingSection;
+        }
+
+        // Footer
+        const footer = document.createElement('footer');
+        footer.innerHTML = `Generated by big-pickle · ${DATA.updatedAt} · Data: Cloudflare GraphQL Analytics`;
+        document.getElementById('dashboard').appendChild(footer);
+    </script>
+</body>
+</html>

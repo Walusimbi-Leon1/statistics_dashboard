@@ -1,0 +1,390 @@
+{
+  "updatedAt": "2026-08-08T10:12:01.921Z",
+  "accounts": {
+    "d21711ae11a362bc4d57d4fd48deae61": {
+      "label": "d21711ae11a362bc4d57d4fd48deae61",
+      "services": {
+        "worker:audiobooks": {
+          "name": "audiobooks",
+          "platform": "worker",
+          "kind": "worker",
+          "daily": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          },
+          "errors": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          }
+        },
+        "worker:bible-trivia": {
+          "name": "bible-trivia",
+          "platform": "worker",
+          "kind": "worker",
+          "daily": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 1425
+          },
+          "errors": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          }
+        },
+        "worker:bluff-dice": {
+          "name": "bluff-dice",
+          "platform": "worker",
+          "kind": "worker",
+          "daily": {
+            "2026-08-06": 111,
+            "2026-08-07": 238,
+            "2026-08-08": 5
+          },
+          "errors": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          }
+        },
+        "worker:dice-arena": {
+          "name": "dice-arena",
+          "platform": "worker",
+          "kind": "worker",
+          "daily": {
+            "2026-08-06": 782,
+            "2026-08-07": 908,
+            "2026-08-08": 279
+          },
+          "errors": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          }
+        },
+        "worker:opencode-proxy": {
+          "name": "opencode-proxy",
+          "platform": "worker",
+          "kind": "worker",
+          "daily": {
+            "2026-08-06": 0,
+            "2026-08-07": 12,
+            "2026-08-08": 0
+          },
+          "errors": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          }
+        },
+        "worker:quran-trivia": {
+          "name": "quran-trivia",
+          "platform": "worker",
+          "kind": "worker",
+          "daily": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          },
+          "errors": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          }
+        },
+        "worker:trivia-rumble-elite": {
+          "name": "trivia-rumble-elite",
+          "platform": "worker",
+          "kind": "worker",
+          "daily": {
+            "2026-08-06": 0,
+            "2026-08-07": 145,
+            "2026-08-08": 17951
+          },
+          "errors": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          }
+        },
+        "worker:youstream-proxy": {
+          "name": "youstream-proxy",
+          "platform": "worker",
+          "kind": "worker",
+          "daily": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          },
+          "errors": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          }
+        }
+      }
+    },
+    "2b4b9a55f950042b9f9bcea76eb24b08": {
+      "label": "2b4b9a55f950042b9f9bcea76eb24b08",
+      "services": {
+        "worker:bible-game-telegram": {
+          "name": "bible-game-telegram",
+          "platform": "worker",
+          "kind": "worker",
+          "daily": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          },
+          "errors": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          }
+        },
+        "worker:casino": {
+          "name": "casino",
+          "platform": "worker",
+          "kind": "worker",
+          "daily": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          },
+          "errors": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          }
+        },
+        "worker:pop-party": {
+          "name": "pop-party",
+          "platform": "worker",
+          "kind": "worker",
+          "daily": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          },
+          "errors": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          }
+        },
+        "worker:pop-the-balloon": {
+          "name": "pop-the-balloon",
+          "platform": "worker",
+          "kind": "worker",
+          "daily": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          },
+          "errors": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          }
+        },
+        "worker:snakeworld1": {
+          "name": "snakeworld1",
+          "platform": "worker",
+          "kind": "worker",
+          "daily": {
+            "2026-08-06": 8137,
+            "2026-08-07": 4,
+            "2026-08-08": 2697
+          },
+          "errors": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          }
+        },
+        "worker:snakeworld1-telegram-bot": {
+          "name": "snakeworld1-telegram-bot",
+          "platform": "worker",
+          "kind": "worker",
+          "daily": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          },
+          "errors": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          }
+        },
+        "worker:trivia-rumble-3": {
+          "name": "trivia-rumble-3",
+          "platform": "worker",
+          "kind": "worker",
+          "daily": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          },
+          "errors": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          }
+        },
+        "worker:voice-vibes": {
+          "name": "voice-vibes",
+          "platform": "worker",
+          "kind": "worker",
+          "daily": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          },
+          "errors": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          }
+        },
+        "worker:wstest-probe2": {
+          "name": "wstest-probe2",
+          "platform": "worker",
+          "kind": "worker",
+          "daily": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          },
+          "errors": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          }
+        },
+        "worker:youtrivia": {
+          "name": "youtrivia",
+          "platform": "worker",
+          "kind": "worker",
+          "daily": {
+            "2026-08-06": 0,
+            "2026-08-07": 7,
+            "2026-08-08": 2
+          },
+          "errors": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          }
+        },
+        "pages:arrow-blast": {
+          "name": "arrow-blast",
+          "platform": "pages",
+          "kind": "pages",
+          "daily": {
+            "2026-08-06": 5988,
+            "2026-08-07": 846,
+            "2026-08-08": 219
+          },
+          "errors": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          }
+        },
+        "pages:pop-party": {
+          "name": "pop-party",
+          "platform": "pages",
+          "kind": "pages",
+          "daily": {
+            "2026-08-06": 3145,
+            "2026-08-07": 9,
+            "2026-08-08": 0
+          },
+          "errors": {
+            "2026-08-06": 5,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          }
+        },
+        "pages:discord-activity-test": {
+          "name": "discord-activity-test",
+          "platform": "pages",
+          "kind": "pages",
+          "daily": {
+            "2026-08-06": 2373,
+            "2026-08-07": 160,
+            "2026-08-08": 24
+          },
+          "errors": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          }
+        },
+        "pages:bible-game": {
+          "name": "bible-game",
+          "platform": "pages",
+          "kind": "pages",
+          "daily": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          },
+          "errors": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          }
+        },
+        "pages:casino": {
+          "name": "casino",
+          "platform": "pages",
+          "kind": "pages",
+          "daily": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          },
+          "errors": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          }
+        },
+        "pages:voice-vibes": {
+          "name": "voice-vibes",
+          "platform": "pages",
+          "kind": "pages",
+          "daily": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          },
+          "errors": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          }
+        },
+        "pages:hindsight": {
+          "name": "hindsight",
+          "platform": "pages",
+          "kind": "pages",
+          "daily": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          },
+          "errors": {
+            "2026-08-06": 0,
+            "2026-08-07": 0,
+            "2026-08-08": 0
+          }
+        }
+      }
+    }
+  }
+}
