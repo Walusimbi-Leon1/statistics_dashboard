@@ -1,250 +1,368 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>🎮 Game Statistics Dashboard</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Statistics Dashboard</title>
 <style>
-:root { --bg:#081c14; --card:#122b20; --card2:#183829; --border:#1f4a35; --text:#eef1fb; --muted:#93b8a8; --gold:#e8c468; --green:#3ecf8e; --red:#ff6b6b; }
-* { box-sizing:border-box; margin:0; padding:0; }
-body { background:radial-gradient(1200px 600px at 50% -10%, #0f4a2e 0%, var(--bg) 55%) fixed, var(--bg); color:var(--text); font-family:"Segoe UI", system-ui, sans-serif; padding:24px; }
-h1 { font-size:26px; margin-bottom:4px; }
-.sub { color:var(--muted); font-size:13px; margin-bottom:20px; }
-.cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-bottom:24px; }
-.card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px; }
-.card .label { color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.5px; }
-.card .value { font-size:24px; font-weight:700; margin-top:6px; color:var(--gold); }
-.table-wrap { overflow-x:auto; background:var(--card); border:1px solid var(--border); border-radius:14px; }
-table { border-collapse:collapse; width:100%; font-size:13px; min-width:900px; }
-th, td { padding:9px 12px; text-align:right; border-bottom:1px solid var(--border); white-space:nowrap; }
-th { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.5px; background:var(--card2); position:sticky; top:0; }
-td:first-child, th:first-child { text-align:left; }
-td.svc { font-weight:600; }
-tr.game { background:rgba(232,196,104,.05); }
-tr.game td.svc { color:var(--gold); }
-tr.infra td { opacity:.55; }
-td.total { font-weight:700; color:var(--gold); }
-.plat { background:var(--card2); border:1px solid var(--border); border-radius:20px; padding:2px 8px; font-size:11px; color:var(--muted); }
-.bar-cell { width:160px; }
-.bar { height:10px; background:linear-gradient(90deg, var(--gold), #f5dfa0); border-radius:6px; margin-left:auto; }
-footer { margin-top:20px; color:var(--muted); font-size:12px; text-align:center; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: radial-gradient(1100px 700px at 85% -10%, rgba(16,185,129,0.12), transparent 60%),
+                radial-gradient(900px 600px at -10% 110%, rgba(251,191,36,0.08), transparent 55%),
+                #0a0e1a;
+    color: #e2e8f0;
+    min-height: 100vh;
+    padding: 32px 20px;
+  }
+  .container { max-width: 1200px; margin: 0 auto; }
+
+  header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 28px; }
+  h1 {
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #fde68a 0%, #fbbf24 50%, #f59e0b 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+  }
+  .updated-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(148,163,184,0.08);
+    border: 1px solid rgba(148,163,184,0.15);
+    padding: 6px 14px; border-radius: 999px;
+    font-size: 12px; color: #94a3b8;
+  }
+  .card {
+    background: linear-gradient(150deg, #0f172a 0%, #0b1120 100%);
+    border: 1px solid #1e293b;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+  }
+
+  /* Stat cards */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .stat-card { padding: 20px; position: relative; overflow: hidden; }
+  .stat-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(251,191,36,0.5), transparent);
+  }
+  .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-bottom: 8px; }
+  .stat-value { font-size: 26px; font-weight: 800; color: #f1f5f9; line-height: 1.2; word-break: break-word; }
+  .stat-value.gold { color: #fbbf24; }
+  .stat-value.sm { font-size: 18px; }
+  .stat-sub { font-size: 12px; color: #64748b; margin-top: 6px; }
+
+  /* Section titles & trending */
+  .section-title { font-size: 16px; font-weight: 700; color: #e2e8f0; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; letter-spacing: 0.2px; }
+  .trending-section { margin-bottom: 24px; }
+  .trending-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .trend-card { padding: 18px; position: relative; overflow: hidden; }
+  .trend-rank { position: absolute; top: 14px; right: 16px; font-size: 26px; font-weight: 800; color: rgba(251,191,36,0.14); }
+  .trend-name { font-size: 15px; font-weight: 700; margin-bottom: 6px; padding-right: 28px; }
+  .trend-delta { font-size: 22px; font-weight: 800; }
+  .trend-delta.up { color: #34d399; }
+  .trend-delta.down { color: #f87171; }
+  .trend-meta { font-size: 12px; color: #64748b; margin-top: 4px; }
+  .trend-track { margin-top: 14px; height: 6px; background: #1e293b; border-radius: 999px; overflow: hidden; }
+  .trend-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #10b981, #34d399); min-width: 4px; }
+  .trend-fill.down { background: linear-gradient(90deg, #ef4444, #f87171); }
+  .new-badge {
+    display: inline-block; background: rgba(16,185,129,0.15); color: #34d399;
+    font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 2px 6px;
+    border-radius: 999px; margin-left: 6px; vertical-align: middle;
+  }
+
+  /* Chart */
+  .chart-card { padding: 24px; margin-bottom: 24px; }
+  .bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .bar-label {
+    width: 220px; flex-shrink: 0; text-align: right; font-size: 12px; font-weight: 500;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .bar-label.infra { color: #64748b; font-weight: 400; }
+  .bar-track { flex: 1; height: 22px; background: #1a2438; border-radius: 999px; overflow: hidden; }
+  .bar-fill { height: 100%; background: linear-gradient(90deg, #f59e0b, #fbbf24); border-radius: 999px 0 0 999px; min-width: 4px; }
+  .bar-fill.infra { background: linear-gradient(90deg, #334155, #475569); }
+  .bar-value { width: 90px; flex-shrink: 0; font-size: 13px; font-weight: 600; text-align: right; }
+
+  /* Table */
+  .table-card { padding: 0; overflow: hidden; }
+  .table-wrap { overflow-x: auto; }
+  .table-wrap::-webkit-scrollbar { height: 8px; }
+  .table-wrap::-webkit-scrollbar-track { background: #0f172a; }
+  .table-wrap::-webkit-scrollbar-thumb { background: #334155; border-radius: 999px; }
+  table { width: 100%; border-collapse: collapse; min-width: 850px; font-size: 13px; }
+  thead th {
+    text-align: left; padding: 14px 12px; font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.8px; color: #94a3b8; border-bottom: 1px solid #1e293b; white-space: nowrap;
+  }
+  thead th.num, td.num { text-align: right; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid rgba(30,41,59,0.5); vertical-align: middle; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: rgba(148,163,184,0.03); }
+  .game-row td { background: rgba(251,191,36,0.03); border-left: 3px solid rgba(251,191,36,0.4); }
+  .game-row:hover td { background: rgba(251,191,36,0.06); }
+  .infra-row td { color: #64748b; }
+  .infra-row .num { color: #475569; }
+  .game-emoji { margin-right: 4px; }
+  .infra-tag {
+    font-size: 9px; color: #475569; border: 1px solid #1e293b; padding: 1px 5px;
+    border-radius: 4px; margin-left: 6px; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .account-cell { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 12px; color: #94a3b8; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+  .badge-worker { background: rgba(56,189,248,0.12); color: #38bdf8; }
+  .badge-pages { background: rgba(167,139,250,0.12); color: #a78bfa; }
+  .total-cell { font-weight: 700; color: #f1f5f9; }
+  .trend { font-weight: 700; font-size: 12px; white-space: nowrap; }
+  .trend.up { color: #34d399; }
+  .trend.down { color: #f87171; }
+  .trend.flat { color: #475569; font-weight: 400; }
+  th[data-sort] { cursor: pointer; user-select: none; }
+  th.sort-asc::after { content: " ▲"; font-size: 9px; color: #fbbf24; }
+  th.sort-desc::after { content: " ▼"; font-size: 9px; color: #fbbf24; }
+
+  footer { text-align: center; font-size: 12px; color: #475569; padding: 32px 0 8px; }
+  .empty { text-align: center; padding: 80px 20px; font-size: 18px; color: #94a3b8; }
+
+  @media (max-width: 600px) {
+    body { padding: 16px 12px; }
+    h1 { font-size: 22px; }
+    .bar-label { width: 120px; }
+    .bar-value { width: 70px; }
+  }
 </style>
 </head>
 <body>
-<h1>🎮 Game Statistics Dashboard</h1>
-<p class="sub">Daily Cloudflare request counts · Workers + Pages · both accounts</p>
-<div class="cards">
-  <div class="card"><div class="label">Requests (last day: 2026-08-08)</div><div class="value">22,622</div></div>
-  <div class="card"><div class="label">Total requests (all time)</div><div class="value">45,487</div></div>
-  <div class="card"><div class="label">Services tracked</div><div class="value">25</div></div>
-  <div class="card"><div class="label">Updated</div><div class="value" style="font-size:15px">2026-08-08T10:18</div></div>
+<div class="container">
+  <header>
+    <h1>🎮 Game Statistics Dashboard</h1>
+    <span class="updated-pill">🕐 Updated <span id="updated-at"></span></span>
+  </header>
+
+  <div id="dashboard">
+    <section class="stats-row" id="stats-row"></section>
+
+    <section class="trending-section">
+      <h2 class="section-title">🔥 Trending</h2>
+      <div class="trending-grid" id="trending-grid"></div>
+    </section>
+
+    <section class="card chart-card">
+      <h2 class="section-title">📊 Requests by Service</h2>
+      <div id="chart-body"></div>
+    </section>
+
+    <section class="card table-card" id="table-card"></section>
+  </div>
+
+  <footer>Generated by <strong>big-pickle</strong> · <span id="footer-updated"></span> · Data: Cloudflare GraphQL Analytics</footer>
 </div>
-<div class="table-wrap">
-<table>
-<thead><tr><th>Service</th><th>Account</th><th>Platform</th><th>08-06</th><th>08-07</th><th>08-08</th><th>Total</th><th>Trend</th><th>Share</th></tr></thead>
-<tbody><tr class="game">
-        <td class="svc">🎮 trivia-rumble-elite</td>
-        <td>d21711ae11a362bc4d57d4fd48deae61</td>
-        <td><span class="plat">worker</span></td>
-        <td>0</td><td>145</td><td>17,969</td>
-        <td class="total">18,114</td>
-        <td><span style="color:#3ecf8e">▲</span></td>
-        <td class="bar-cell"><div class="bar" style="width:100.0%"></div></td>
-      </tr><tr class="game">
-        <td class="svc">🎮 snakeworld1</td>
-        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
-        <td><span class="plat">worker</span></td>
-        <td>8,137</td><td>4</td><td>2,697</td>
-        <td class="total">10,838</td>
-        <td><span style="color:#3ecf8e">▲</span></td>
-        <td class="bar-cell"><div class="bar" style="width:59.8%"></div></td>
-      </tr><tr class="game">
-        <td class="svc">🎮 arrow-blast</td>
-        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
-        <td><span class="plat">pages</span></td>
-        <td>5,988</td><td>846</td><td>219</td>
-        <td class="total">7,053</td>
-        <td><span style="color:#ff6b6b">▼</span></td>
-        <td class="bar-cell"><div class="bar" style="width:38.9%"></div></td>
-      </tr><tr class="game">
-        <td class="svc">🎮 pop-party</td>
-        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
-        <td><span class="plat">pages</span></td>
-        <td>3,145</td><td>9</td><td>0</td>
-        <td class="total">3,154</td>
-        <td><span style="color:#ff6b6b">▼</span></td>
-        <td class="bar-cell"><div class="bar" style="width:17.4%"></div></td>
-      </tr><tr class="infra">
-        <td class="svc">🛠️ discord-activity-test</td>
-        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
-        <td><span class="plat">pages</span></td>
-        <td>2,373</td><td>160</td><td>24</td>
-        <td class="total">2,557</td>
-        <td><span style="color:#ff6b6b">▼</span></td>
-        <td class="bar-cell"><div class="bar" style="width:14.1%"></div></td>
-      </tr><tr class="game">
-        <td class="svc">🎮 dice-arena</td>
-        <td>d21711ae11a362bc4d57d4fd48deae61</td>
-        <td><span class="plat">worker</span></td>
-        <td>782</td><td>908</td><td>281</td>
-        <td class="total">1,971</td>
-        <td><span style="color:#ff6b6b">▼</span></td>
-        <td class="bar-cell"><div class="bar" style="width:10.9%"></div></td>
-      </tr><tr class="game">
-        <td class="svc">🎮 bible-trivia</td>
-        <td>d21711ae11a362bc4d57d4fd48deae61</td>
-        <td><span class="plat">worker</span></td>
-        <td>0</td><td>0</td><td>1,425</td>
-        <td class="total">1,425</td>
-        <td><span style="color:#3ecf8e">▲</span></td>
-        <td class="bar-cell"><div class="bar" style="width:7.9%"></div></td>
-      </tr><tr class="game">
-        <td class="svc">🎮 bluff-dice</td>
-        <td>d21711ae11a362bc4d57d4fd48deae61</td>
-        <td><span class="plat">worker</span></td>
-        <td>111</td><td>238</td><td>5</td>
-        <td class="total">354</td>
-        <td><span style="color:#ff6b6b">▼</span></td>
-        <td class="bar-cell"><div class="bar" style="width:2.0%"></div></td>
-      </tr><tr class="infra">
-        <td class="svc">🛠️ opencode-proxy</td>
-        <td>d21711ae11a362bc4d57d4fd48deae61</td>
-        <td><span class="plat">worker</span></td>
-        <td>0</td><td>12</td><td>0</td>
-        <td class="total">12</td>
-        <td><span style="color:#ff6b6b">▼</span></td>
-        <td class="bar-cell"><div class="bar" style="width:0.1%"></div></td>
-      </tr><tr class="game">
-        <td class="svc">🎮 youtrivia</td>
-        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
-        <td><span class="plat">worker</span></td>
-        <td>0</td><td>7</td><td>2</td>
-        <td class="total">9</td>
-        <td><span style="color:#ff6b6b">▼</span></td>
-        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
-      </tr><tr class="infra">
-        <td class="svc">🛠️ audiobooks</td>
-        <td>d21711ae11a362bc4d57d4fd48deae61</td>
-        <td><span class="plat">worker</span></td>
-        <td>0</td><td>0</td><td>0</td>
-        <td class="total">0</td>
-        <td><span style="color:#3ecf8e">▲</span></td>
-        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
-      </tr><tr class="game">
-        <td class="svc">🎮 quran-trivia</td>
-        <td>d21711ae11a362bc4d57d4fd48deae61</td>
-        <td><span class="plat">worker</span></td>
-        <td>0</td><td>0</td><td>0</td>
-        <td class="total">0</td>
-        <td><span style="color:#3ecf8e">▲</span></td>
-        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
-      </tr><tr class="infra">
-        <td class="svc">🛠️ youstream-proxy</td>
-        <td>d21711ae11a362bc4d57d4fd48deae61</td>
-        <td><span class="plat">worker</span></td>
-        <td>0</td><td>0</td><td>0</td>
-        <td class="total">0</td>
-        <td><span style="color:#3ecf8e">▲</span></td>
-        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
-      </tr><tr class="game">
-        <td class="svc">🎮 bible-game-telegram</td>
-        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
-        <td><span class="plat">worker</span></td>
-        <td>0</td><td>0</td><td>0</td>
-        <td class="total">0</td>
-        <td><span style="color:#3ecf8e">▲</span></td>
-        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
-      </tr><tr class="game">
-        <td class="svc">🎮 casino</td>
-        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
-        <td><span class="plat">worker</span></td>
-        <td>0</td><td>0</td><td>0</td>
-        <td class="total">0</td>
-        <td><span style="color:#3ecf8e">▲</span></td>
-        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
-      </tr><tr class="game">
-        <td class="svc">🎮 pop-party</td>
-        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
-        <td><span class="plat">worker</span></td>
-        <td>0</td><td>0</td><td>0</td>
-        <td class="total">0</td>
-        <td><span style="color:#3ecf8e">▲</span></td>
-        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
-      </tr><tr class="game">
-        <td class="svc">🎮 pop-the-balloon</td>
-        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
-        <td><span class="plat">worker</span></td>
-        <td>0</td><td>0</td><td>0</td>
-        <td class="total">0</td>
-        <td><span style="color:#3ecf8e">▲</span></td>
-        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
-      </tr><tr class="game">
-        <td class="svc">🎮 snakeworld1-telegram-bot</td>
-        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
-        <td><span class="plat">worker</span></td>
-        <td>0</td><td>0</td><td>0</td>
-        <td class="total">0</td>
-        <td><span style="color:#3ecf8e">▲</span></td>
-        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
-      </tr><tr class="game">
-        <td class="svc">🎮 trivia-rumble-3</td>
-        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
-        <td><span class="plat">worker</span></td>
-        <td>0</td><td>0</td><td>0</td>
-        <td class="total">0</td>
-        <td><span style="color:#3ecf8e">▲</span></td>
-        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
-      </tr><tr class="game">
-        <td class="svc">🎮 voice-vibes</td>
-        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
-        <td><span class="plat">worker</span></td>
-        <td>0</td><td>0</td><td>0</td>
-        <td class="total">0</td>
-        <td><span style="color:#3ecf8e">▲</span></td>
-        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
-      </tr><tr class="infra">
-        <td class="svc">🛠️ wstest-probe2</td>
-        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
-        <td><span class="plat">worker</span></td>
-        <td>0</td><td>0</td><td>0</td>
-        <td class="total">0</td>
-        <td><span style="color:#3ecf8e">▲</span></td>
-        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
-      </tr><tr class="game">
-        <td class="svc">🎮 bible-game</td>
-        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
-        <td><span class="plat">pages</span></td>
-        <td>0</td><td>0</td><td>0</td>
-        <td class="total">0</td>
-        <td><span style="color:#3ecf8e">▲</span></td>
-        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
-      </tr><tr class="game">
-        <td class="svc">🎮 casino</td>
-        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
-        <td><span class="plat">pages</span></td>
-        <td>0</td><td>0</td><td>0</td>
-        <td class="total">0</td>
-        <td><span style="color:#3ecf8e">▲</span></td>
-        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
-      </tr><tr class="game">
-        <td class="svc">🎮 voice-vibes</td>
-        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
-        <td><span class="plat">pages</span></td>
-        <td>0</td><td>0</td><td>0</td>
-        <td class="total">0</td>
-        <td><span style="color:#3ecf8e">▲</span></td>
-        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
-      </tr><tr class="game">
-        <td class="svc">🎮 hindsight</td>
-        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
-        <td><span class="plat">pages</span></td>
-        <td>0</td><td>0</td><td>0</td>
-        <td class="total">0</td>
-        <td><span style="color:#3ecf8e">▲</span></td>
-        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
-      </tr></tbody>
-</table>
-</div>
-<footer>Generated by big-pickle · 2026-08-08T10:18:19.577Z · Data: Cloudflare GraphQL Analytics</footer>
+
+<script>
+(function () {
+  const DATA = {"updatedAt":"2026-08-08T10:12:01.921Z","services":[{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"trivia-rumble-elite","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":145,"2026-08-08":17951}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"snakeworld1","platform":"worker","kind":"worker","daily":{"2026-08-06":8137,"2026-08-07":4,"2026-08-08":2697}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"arrow-blast","platform":"pages","kind":"pages","daily":{"2026-08-06":5988,"2026-08-07":846,"2026-08-08":219}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"pop-party","platform":"pages","kind":"pages","daily":{"2026-08-06":3145,"2026-08-07":9,"2026-08-08":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"discord-activity-test","platform":"pages","kind":"pages","daily":{"2026-08-06":2373,"2026-08-07":160,"2026-08-08":24}},{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"dice-arena","platform":"worker","kind":"worker","daily":{"2026-08-06":782,"2026-08-07":908,"2026-08-08":279}},{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"bible-trivia","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":1425}},{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"bluff-dice","platform":"worker","kind":"worker","daily":{"2026-08-06":111,"2026-08-07":238,"2026-08-08":5}},{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"opencode-proxy","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":12,"2026-08-08":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"youtrivia","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":7,"2026-08-08":2}},{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"audiobooks","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0}},{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"quran-trivia","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0}},{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"youstream-proxy","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"bible-game-telegram","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"casino","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"pop-party","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"pop-the-balloon","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"snakeworld1-telegram-bot","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"trivia-rumble-3","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"voice-vibes","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"wstest-probe2","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"bible-game","platform":"pages","kind":"pages","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"casino","platform":"pages","kind":"pages","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"voice-vibes","platform":"pages","kind":"pages","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"hindsight","platform":"pages","kind":"pages","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0}}]};
+
+  const GAME_KEYWORDS = ['trivia', 'bible', 'quran', 'dice', 'bluff', 'snake', 'pop', 'casino', 'voice', 'youtrivia', 'arrow', 'blast', 'balloon'];
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  const isGame = (s) => s.kind.includes('game') || GAME_KEYWORDS.some(k => s.service.toLowerCase().includes(k));
+  const fmt = (n) => (n || 0).toLocaleString('en-US');
+  const fmtDate = (d) => {
+    const p = d.split('-');
+    return MONTHS[parseInt(p[1], 10) - 1] + ' ' + parseInt(p[2], 10);
+  };
+  const truncateAccount = (acc) => acc.length > 9 ? acc.slice(0, 9) + '…' : acc;
+
+  document.getElementById('updated-at').textContent = DATA.updatedAt;
+  document.getElementById('footer-updated').textContent = DATA.updatedAt;
+
+  const allDates = [...new Set(DATA.services.flatMap(s => Object.keys(s.daily)))].sort();
+  const services = DATA.services.map(s => {
+    const values = allDates.map(d => s.daily[d] || 0);
+    const total = values.reduce((a, b) => a + b, 0);
+    const last = values.length ? values[values.length - 1] : 0;
+    const prev = values.length > 1 ? values[values.length - 2] : 0;
+    let trend = 'flat';
+    if (last > prev) trend = 'up';
+    else if (last < prev) trend = 'down';
+    return { ...s, values, total, last, prev, trend, delta: last - prev, game: isGame(s) };
+  });
+
+  const totalLastDay = services.reduce((a, s) => a + s.last, 0);
+  const totalAllTime = services.reduce((a, s) => a + s.total, 0);
+  const topService = services.reduce((a, s) => s.total > a.total ? s : a, services[0]);
+
+  if (totalAllTime === 0) {
+    document.getElementById('dashboard').innerHTML = '<div class="empty">🫥 No data collected yet</div>';
+    return;
+  }
+
+  /* ---------- Stat cards ---------- */
+  function renderStats() {
+    const cards = [
+      { label: 'Requests · Last Day', value: fmt(totalLastDay), icon: '🚀', sub: fmtDate(allDates[allDates.length - 1]) },
+      { label: 'Requests · All Time', value: fmt(totalAllTime), icon: '📊', sub: allDates.length + ' days tracked' },
+      { label: 'Services Tracked', value: fmt(services.length), icon: '🛠️', sub: services.filter(s => s.total > 0).length + ' active' },
+      { label: 'Top Service', value: topService.service, icon: '🏆', sub: fmt(topService.total) + ' total requests', gold: true, sm: true }
+    ];
+    document.getElementById('stats-row').innerHTML = cards.map(c => `
+      <div class="card stat-card">
+        <div class="stat-label">${c.icon} ${c.label}</div>
+        <div class="stat-value ${c.gold ? 'gold' : ''} ${c.sm ? 'sm' : ''}">${c.value}</div>
+        <div class="stat-sub">${c.sub}</div>
+      </div>
+    `).join('');
+  }
+
+  /* ---------- Trending ---------- */
+  function renderTrending() {
+    const trending = [...services].sort((a, b) => b.delta - a.delta).slice(0, 3);
+    const maxAbsDelta = Math.max(...trending.map(t => Math.abs(t.delta)), 1);
+    const nodes = trending.map((t, i) => {
+      const dir = t.delta >= 0 ? 'up' : 'down';
+      const deltaStr = t.delta >= 0 ? '+' + fmt(t.delta) : fmt(t.delta);
+      const arrow = dir === 'up' ? '▲' : '▼';
+      const pct = t.prev > 0 ? Math.round(Math.abs(t.delta) / t.prev * 100) : null;
+      const width = Math.max(4, Math.abs(t.delta) / maxAbsDelta * 100);
+      const badge = t.prev === 0 && t.delta > 0 ? '<span class="new-badge">New</span>' : '';
+      return `
+        <div class="card trend-card">
+          <div class="trend-rank">#${i + 1}</div>
+          <div class="trend-name">${t.game ? '🎮' : '⚙️'} ${t.service}${badge}</div>
+          <div class="trend-delta ${dir}">${arrow} ${deltaStr}</div>
+          <div class="trend-meta">${fmt(t.prev)} → ${fmt(t.last)} requests${pct !== null ? ` · ${dir === 'up' ? '+' : '-'}${pct}%` : ''}</div>
+          <div class="trend-track"><div class="trend-fill ${dir}" style="width:${width}%"></div></div>
+        </div>`;
+    });
+    document.getElementById('trending-grid').innerHTML = nodes.join('');
+  }
+
+  /* ---------- Bar chart ---------- */
+  function renderChart() {
+    const chartData = services.filter(s => s.total > 0).sort((a, b) => b.total - a.total);
+    if (!chartData.length) {
+      document.getElementById('chart-body').innerHTML = '<div class="empty">No chart data yet</div>';
+      return;
+    }
+    const maxTotal = chartData[0].total;
+    document.getElementById('chart-body').innerHTML = chartData.map(s => `
+      <div class="bar-row">
+        <div class="bar-label ${s.game ? '' : 'infra'}" title="${s.service}">${s.game ? '🎮' : '⚙️'} ${s.service}</div>
+        <div class="bar-track"><div class="bar-fill ${s.game ? '' : 'infra'}" style="width:${Math.max(2, s.total / maxTotal * 100)}%"></div></div>
+        <div class="bar-value">${fmt(s.total)}</div>
+      </div>
+    `).join('');
+  }
+
+  /* ---------- Table ---------- */
+  let sortKey = 'total';
+  let sortDir = -1;
+
+  function sortServices() {
+    const arr = [...services];
+    arr.sort((a, b) => {
+      let va, vb;
+      switch (sortKey) {
+        case 'service': va = a.service.toLowerCase(); vb = b.service.toLowerCase(); break;
+        case 'account': va = a.account; vb = b.account; break;
+        case 'platform': va = a.platform; vb = b.platform; break;
+        case 'total': va = a.total; vb = b.total; break;
+        case 'last': va = a.delta; vb = b.delta; break;
+        default: va = a.daily[sortKey] || 0; vb = b.daily[sortKey] || 0;
+      }
+      if (va < vb) return -sortDir;
+      if (va > vb) return sortDir;
+      return a.service.localeCompare(b.service);
+    });
+    return arr;
+  }
+
+  function trendCell(s) {
+    if (s.trend === 'up') {
+      const pct = s.prev > 0 ? Math.round((s.last - s.prev) / s.prev * 100) : null;
+      const title = pct !== null ? ` title="+${pct}% vs ${fmtDate(allDates[allDates.length - 2])}"` : ' title="New activity"';
+      return `<span class="trend up"${title}>▲ ${fmt(s.last - s.prev)}</span>`;
+    }
+    if (s.trend === 'down') {
+      const pct = s.prev > 0 ? Math.round((s.prev - s.last) / s.prev * 100) : null;
+      const title = pct !== null ? ` title="${pct}% vs ${fmtDate(allDates[allDates.length - 2])}"` : '';
+      return `<span class="trend down"${title}>▼ ${fmt(s.prev - s.last)}</span>`;
+    }
+    return '<span class="trend flat">—</span>';
+  }
+
+  function rowHtml(s) {
+    const cls = s.game ? 'game-row' : 'infra-row';
+    const emoji = s.game ? '<span class="game-emoji">🎮</span>' : '<span class="game-emoji">⚙️</span>';
+    const tag = s.game ? '' : '<span class="infra-tag">infra</span>';
+    const platformBadge = `<span class="badge badge-${s.platform}">${s.platform}</span>`;
+    const dateTds = s.values.map(v => `<td class="num">${fmt(v)}</td>`).join('');
+    return `
+      <tr class="${cls}">
+        <td>${emoji}<span class="service-name">${s.service}</span>${tag}</td>
+        <td class="account-cell" title="${s.account}">${truncateAccount(s.account)}</td>
+        <td>${platformBadge}</td>
+        ${dateTds}
+        <td class="num total-cell">${fmt(s.total)}</td>
+        <td>${trendCell(s)}</td>
+      </tr>`;
+  }
+
+  function tableHtml() {
+    const headers = [
+      { key: 'service', label: 'Service' },
+      { key: 'account', label: 'Account' },
+      { key: 'platform', label: 'Platform' },
+      ...allDates.map(d => ({ key: d, label: fmtDate(d) })),
+      { key: 'total', label: 'Total' },
+      { key: 'last', label: 'Trend' }
+    ];
+    const thead = '<thead><tr>' + headers.map(h => {
+      const numCls = ['service', 'account', 'platform'].includes(h.key) ? '' : 'num';
+      return `<th data-sort="${h.key}" class="${numCls}">${h.label}</th>`;
+    }).join('') + '</tr></thead>';
+    const sorted = sortServices();
+    const tbody = `<tbody id="table-body">${sorted.map(rowHtml).join('')}</tbody>`;
+    return `<div class="table-wrap"><table>${thead}${tbody}</table></div>`;
+  }
+
+  function renderTable() {
+    document.getElementById('table-card').innerHTML = tableHtml();
+    document.querySelectorAll('#table-card th[data-sort]').forEach(th => {
+      th.classList.toggle('sort-asc', sortKey === th.dataset.sort && sortDir > 0);
+      th.classList.toggle('sort-desc', sortKey === th.dataset.sort && sortDir < 0);
+    });
+  }
+
+  function sortBy(key) {
+    if (sortKey === key) {
+      sortDir *= -1;
+    } else {
+      sortKey = key;
+      sortDir = ['service', 'account', 'platform'].includes(key) ? 1 : -1;
+    }
+    renderTable();
+  }
+
+  document.getElementById('table-card').addEventListener('click', e => {
+    const th = e.target.closest('th[data-sort]');
+    if (th) sortBy(th.dataset.sort);
+  });
+
+  renderStats();
+  renderTrending();
+  renderChart();
+  renderTable();
+})();
+</script>
 </body>
 </html>

@@ -84,14 +84,21 @@ Return ONLY the complete HTML document (starting with <!DOCTYPE html>). Do not w
         { role: "user", content: prompt },
       ],
       temperature: 0.4,
-      max_tokens: 20000,
+      max_tokens: 32000,
     }),
   });
 
   if (!res.ok) throw new Error(`opencode.ai ${res.status}: ${(await res.text()).slice(0, 200)}`);
   const data = await res.json();
   let content = data?.choices?.[0]?.message?.content || "";
-  if (!content.trim()) throw new Error("empty model response");
+  const reasoning = data?.choices?.[0]?.message?.reasoning_content || "";
+  if (!content.trim()) {
+    // Diagnostic: log the raw response shape so Actions logs show what came back
+    console.error(
+      `[generate] empty content — reasoning_len=${String(reasoning).length}, finish=${data?.choices?.[0]?.finish_reason}, raw: ${JSON.stringify(data).slice(0, 400)}`
+    );
+    throw new Error("empty model response");
+  }
   content = content.replace(/```html\n?/gi, "").replace(/```\n?/g, "").trim();
   if (!/<\/html>/i.test(content)) throw new Error("model output missing </html>");
   if (content.length > 1_500_000) throw new Error("model output too large");
