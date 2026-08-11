@@ -1,611 +1,349 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Statistics Dashboard</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: radial-gradient(1200px 700px at 85% -10%, #0f1e2d 0%, #0a0e1a 60%) fixed;
-            background-color: #0a0e1a;
-            color: #e5e7eb;
-            min-height: 100vh;
-            padding: 28px 24px;
-            line-height: 1.5;
-        }
-        .container {
-            max-width: 1440px;
-            margin: 0 auto;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Statistics Dashboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: radial-gradient(1200px 700px at 85% -10%, #102b2a 0%, #0b0f1a 55%) fixed;
+    background-color: #0b0f1a;
+    color: #e2e8f0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    line-height: 1.45;
+  }
+  .dashboard { max-width: 1440px; margin: 0 auto; padding: 32px 24px 24px; }
 
-        header {
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 28px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid #1e2a3a;
-        }
-        h1 {
-            font-size: 30px;
-            font-weight: 800;
-            color: #fbbf24;
-            letter-spacing: -0.02em;
-        }
-        .subtitle {
-            color: #6b7280;
-            font-size: 13px;
-            margin-top: 4px;
-        }
+  /* Header */
+  header { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px; margin-bottom: 28px; }
+  .title-wrap h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; color: #f8fafc; }
+  .title-wrap .tagline { color: #7d8ba1; font-size: 13px; margin-top: 4px; }
+  .updated { color: #7d8ba1; font-size: 13px; text-align: right; line-height: 1.5; }
+  .updated strong { color: #f5c542; font-weight: 600; }
 
-        .panel {
-            background: #0f1524;
-            border: 1px solid #1e2a3a;
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 28px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-        }
-        .section-head {
-            margin-bottom: 18px;
-        }
-        .section-head h2 {
-            font-size: 18px;
-            font-weight: 700;
-            color: #fbbf24;
-        }
-        .section-head p {
-            font-size: 13px;
-            color: #6b7280;
-            margin-top: 2px;
-        }
+  /* Summary cards */
+  .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+  .card {
+    background: linear-gradient(145deg, #151d30, #101726);
+    border: 1px solid #1f2a3f;
+    border-radius: 14px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, #f5c542, #10b981); opacity: 0.8; }
+  .card .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.09em; color: #7d8ba1; font-weight: 700; }
+  .card .value { font-size: 26px; font-weight: 800; margin-top: 10px; color: #f8fafc; letter-spacing: -0.01em; word-break: break-word; }
+  .card .sub { font-size: 12px; color: #7d8ba1; margin-top: 8px; }
+  .card.top-service { border-color: rgba(245, 197, 66, 0.35); box-shadow: 0 0 24px rgba(245, 197, 66, 0.08); }
+  .card.top-service::before { background: linear-gradient(90deg, #f5c542, #f5c542); }
 
-        /* Summary cards */
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            margin-bottom: 28px;
-        }
-        @media (max-width: 900px) {
-            .summary-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        @media (max-width: 520px) {
-            .summary-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        .stat-card {
-            background: linear-gradient(145deg, #141d2d, #0e1524);
-            border: 1px solid #1e2a3a;
-            border-radius: 16px;
-            padding: 20px;
-            position: relative;
-            overflow: hidden;
-        }
-        .stat-card::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #f59e0b, #fbbf24, #f59e0b);
-            opacity: 0.7;
-        }
-        .stat-label {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.09em;
-            color: #9ca3af;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-        .stat-value {
-            font-size: 28px;
-            font-weight: 800;
-            color: #fbbf24;
-            letter-spacing: -0.02em;
-            overflow-wrap: anywhere;
-        }
-        .stat-card-top .stat-value {
-            font-size: 20px;
-            line-height: 1.3;
-        }
-        .stat-sub {
-            font-size: 13px;
-            color: #6b7280;
-            margin-top: 4px;
-        }
+  /* Panels */
+  .panel { background: #101726; border: 1px solid #1f2a3f; border-radius: 14px; padding: 22px; margin-bottom: 28px; }
+  .panel h2 { font-size: 16px; font-weight: 700; color: #f8fafc; margin-bottom: 16px; letter-spacing: -0.01em; }
+  .panel h2 span { color: #7d8ba1; font-weight: 500; font-size: 13px; margin-left: 8px; }
+  .grid-2 { display: grid; grid-template-columns: 1.4fr 1fr; gap: 28px; align-items: start; }
+  .grid-2 .panel { margin-bottom: 0; }
 
-        /* Table */
-        .table-wrapper {
-            overflow-x: auto;
-            border-radius: 12px;
-            border: 1px solid #1a2435;
-            background: #0d1322;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-            min-width: 1050px;
-        }
-        thead th {
-            text-align: left;
-            padding: 14px 12px;
-            background: #131c2b;
-            color: #8b95a5;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            border-bottom: 1px solid #1e2a3a;
-            white-space: nowrap;
-            font-weight: 600;
-        }
-        thead th.num,
-        tbody td.num {
-            text-align: right;
-            font-variant-numeric: tabular-nums;
-        }
-        tbody td {
-            padding: 10px 12px;
-            border-bottom: 1px solid #141d2b;
-            white-space: nowrap;
-            vertical-align: middle;
-        }
-        tbody tr:last-child td {
-            border-bottom: none;
-        }
-        tbody tr.game-row {
-            background: rgba(251, 191, 36, 0.05);
-        }
-        tbody tr.game-row:hover {
-            background: rgba(251, 191, 36, 0.11);
-        }
-        tbody tr.infra-row {
-            opacity: 0.5;
-        }
-        tbody tr.infra-row:hover {
-            opacity: 0.9;
-        }
-        tbody tr.infra-row td {
-            color: #6b7280;
-        }
-        .service-cell {
-            font-weight: 600;
-        }
-        .game-row .service-cell {
-            color: #fbbf24;
-        }
-        .game-icon {
-            font-size: 14px;
-            margin-right: 2px;
-        }
-        .infra-badge {
-            display: inline-block;
-            margin-left: 8px;
-            padding: 2px 8px;
-            border-radius: 999px;
-            font-size: 10px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: #6b7280;
-            background: rgba(107, 114, 128, 0.15);
-            border: 1px solid rgba(107, 114, 128, 0.25);
-            vertical-align: middle;
-        }
-        .badge {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 999px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-        }
-        .badge.worker {
-            background: rgba(59, 130, 246, 0.15);
-            color: #60a5fa;
-            border: 1px solid rgba(59, 130, 246, 0.25);
-        }
-        .badge.pages {
-            background: rgba(168, 85, 247, 0.15);
-            color: #c084fc;
-            border: 1px solid rgba(168, 85, 247, 0.25);
-        }
-        .account-cell {
-            color: #9ca3af;
-            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-            font-size: 12px;
-        }
-        .total-cell {
-            font-weight: 700;
-            color: #fbbf24;
-        }
-        .zero {
-            color: #3d4757;
-        }
-        .trend-up {
-            color: #10b981;
-            font-weight: 700;
-        }
-        .trend-down {
-            color: #ef4444;
-            font-weight: 700;
-        }
-        .trend-flat {
-            color: #6b7280;
-        }
+  /* Table */
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 10px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 1080px; }
+  th {
+    text-align: right;
+    padding: 10px 12px;
+    color: #7d8ba1;
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid #1f2a3f;
+    white-space: nowrap;
+    background: #0d1424;
+    position: sticky;
+    top: 0;
+  }
+  th:first-child, th:nth-child(2) { text-align: left; }
+  th:last-child { text-align: center; }
+  td { padding: 9px 12px; text-align: right; border-bottom: 1px solid #16203a; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  td:first-child { text-align: left; }
+  td:nth-child(2) { text-align: left; color: #8b95a9; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12px; }
+  td:last-child { text-align: center; }
+  tbody tr { transition: background 0.15s ease; }
+  tbody tr:hover { background: rgba(255, 255, 255, 0.03); }
+  tr.game { background: rgba(245, 197, 66, 0.055); }
+  tr.game:hover { background: rgba(245, 197, 66, 0.10); }
+  tr.game td:first-child { box-shadow: inset 3px 0 0 #f5c542; }
+  tr.infra td { color: #6b7689; }
+  tr.infra td.total-cell { color: #8494ab; }
+  .service-name { font-weight: 600; color: #e2e8f0; }
+  tr.infra .service-name { color: #8494ab; font-weight: 500; }
+  .total-cell { font-weight: 800; color: #f8fafc; }
+  .badge { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 5px; margin-left: 6px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; vertical-align: 1px; }
+  .badge.game { background: rgba(245, 197, 66, 0.14); color: #f5c542; border: 1px solid rgba(245, 197, 66, 0.28); }
+  .badge.infra { background: rgba(109, 118, 137, 0.14); color: #8b95a9; border: 1px solid rgba(109, 118, 137, 0.28); }
+  .platform { display: inline-block; font-size: 11px; padding: 2px 9px; border-radius: 6px; background: rgba(16, 185, 129, 0.10); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.22); }
+  .platform-pages { background: rgba(245, 197, 66, 0.08); color: #f5c542; border-color: rgba(245, 197, 66, 0.22); }
+  .trend { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .trend.up { color: #34d399; }
+  .trend.down { color: #f87171; }
+  .trend.flat { color: #94a3b8; font-weight: 600; }
+  .table-note { font-size: 12px; color: #5b667d; margin-top: 14px; line-height: 1.6; }
+  .empty { text-align: center; padding: 40px 20px !important; color: #7d8ba1; font-size: 15px; }
 
-        /* Bar chart */
-        .bar-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 8px;
-        }
-        .bar-label {
-            width: 190px;
-            flex-shrink: 0;
-            text-align: right;
-            font-size: 13px;
-            color: #d1d5db;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            font-weight: 500;
-        }
-        .bar-track {
-            flex: 1;
-            height: 22px;
-            background: #1a2435;
-            border-radius: 6px;
-            overflow: hidden;
-            position: relative;
-        }
-        .bar-fill {
-            height: 100%;
-            border-radius: 6px;
-            background: linear-gradient(90deg, #d97706, #fbbf24);
-            min-width: 2px;
-            transition: width 0.4s ease;
-        }
-        .bar-value {
-            width: 100px;
-            flex-shrink: 0;
-            font-size: 13px;
-            color: #fbbf24;
-            font-weight: 700;
-            text-align: right;
-            font-variant-numeric: tabular-nums;
-        }
-        .bar-infra {
-            opacity: 0.5;
-        }
-        .bar-infra .bar-label {
-            color: #6b7280;
-        }
-        .bar-infra .bar-fill {
-            background: linear-gradient(90deg, #374151, #4b5563);
-        }
-        @media (max-width: 700px) {
-            .bar-label {
-                width: 110px;
-                font-size: 12px;
-            }
-            .bar-value {
-                width: 70px;
-                font-size: 12px;
-            }
-        }
+  /* Bar chart */
+  #barChart { display: flex; flex-direction: column; gap: 2px; max-height: 620px; overflow-y: auto; padding-right: 6px; }
+  .bar-row { display: grid; grid-template-columns: minmax(150px, 1.2fr) 2fr 90px; align-items: center; gap: 12px; padding: 4px 0; font-size: 13px; transition: background 0.15s ease; border-radius: 6px; }
+  .bar-row:hover { background: rgba(255, 255, 255, 0.03); }
+  .bar-row.infra { opacity: 0.45; }
+  .bar-row.infra:hover { opacity: 0.75; }
+  .bar-label { text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #cbd5e1; }
+  .bar-row.infra .bar-label { color: #8494ab; }
+  .bar-track { background: #1a2338; border-radius: 6px; height: 14px; overflow: hidden; position: relative; }
+  .bar-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, #10b981, #34d399 60%, #f5c542); min-width: 0; transition: width 0.5s ease; }
+  .bar-row.infra .bar-fill { background: linear-gradient(90deg, #334155, #475569); }
+  .bar-value { text-align: right; color: #e2e8f0; font-variant-numeric: tabular-nums; font-weight: 600; }
 
-        /* Trending */
-        .trending-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-        }
-        @media (max-width: 700px) {
-            .trending-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        .trend-card {
-            background: linear-gradient(145deg, #141d2d, #0e1524);
-            border: 1px solid #1e2a3a;
-            border-radius: 12px;
-            padding: 18px;
-            position: relative;
-        }
-        .trend-card::after {
-            content: "";
-            position: absolute;
-            bottom: 0;
-            left: 18px;
-            right: 18px;
-            height: 2px;
-            border-radius: 2px;
-            background: linear-gradient(90deg, transparent, #fbbf24, transparent);
-            opacity: 0.4;
-        }
-        .trend-rank {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: #6b7280;
-            font-weight: 600;
-        }
-        .trend-service {
-            font-size: 16px;
-            font-weight: 700;
-            margin: 6px 0 4px;
-            color: #e5e7eb;
-            overflow-wrap: anywhere;
-        }
-        .trend-delta {
-            font-size: 24px;
-            font-weight: 800;
-            letter-spacing: -0.01em;
-        }
-        .trend-sub {
-            font-size: 12px;
-            color: #6b7280;
-            margin-top: 4px;
-            font-variant-numeric: tabular-nums;
-        }
-        .trend-card-infra {
-            opacity: 0.55;
-        }
-        .trend-card-infra .trend-service {
-            color: #9ca3af;
-        }
+  /* Trending */
+  .trending-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .trend-card { background: linear-gradient(145deg, #151d30, #101726); border: 1px solid #1f2a3f; border-radius: 12px; padding: 16px; position: relative; overflow: hidden; }
+  .trend-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, #f5c542, #10b981); opacity: 0.7; }
+  .trend-card .rank { font-size: 11px; color: #7d8ba1; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; }
+  .trend-card .name { font-size: 15px; font-weight: 700; color: #f8fafc; margin-top: 8px; word-break: break-word; }
+  .trend-card .sub { font-size: 12px; color: #5b667d; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .trend-card .delta { font-size: 20px; font-weight: 800; margin-top: 10px; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+  .delta.up { color: #34d399; }
+  .delta.down { color: #f87171; }
+  .delta.flat { color: #94a3b8; }
 
-        .empty {
-            text-align: center;
-            color: #6b7280;
-            padding: 48px 20px;
-            font-size: 16px;
-            border: 1px dashed #1e2a3a;
-            border-radius: 12px;
-        }
+  /* Footer */
+  footer { text-align: center; color: #5b667d; font-size: 12px; padding: 22px 0 6px; border-top: 1px solid #1f2a3f; margin-top: 8px; }
+  footer span { color: #7d8ba1; }
 
-        footer {
-            text-align: center;
-            color: #4b5563;
-            font-size: 12px;
-            margin-top: 40px;
-            padding: 20px 0;
-            border-top: 1px solid #1e2a3a;
-        }
-        footer span {
-            color: #6b7280;
-        }
-    </style>
+  /* Scrollbar */
+  #barChart::-webkit-scrollbar { width: 6px; }
+  #barChart::-webkit-scrollbar-track { background: transparent; }
+  #barChart::-webkit-scrollbar-thumb { background: #2a3650; border-radius: 4px; }
+
+  /* Responsive */
+  @media (max-width: 1100px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .grid-2 .panel { margin-bottom: 28px; }
+    .cards { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .dashboard { padding: 20px 14px; }
+    .title-wrap h1 { font-size: 22px; }
+    .cards { grid-template-columns: 1fr; }
+    .trending-cards { grid-template-columns: 1fr; }
+    .bar-row { grid-template-columns: 110px 1fr 70px; gap: 8px; }
+  }
+</style>
 </head>
 <body>
-    <div class="container" id="dashboard">
-        <header>
-            <div>
-                <h1><span>🎮</span> Game Statistics Dashboard</h1>
-                <p class="subtitle">Cloudflare Worker &amp; Pages request counts — updated <span id="header-updated"></span></p>
-            </div>
-        </header>
-
-        <section class="summary-grid">
-            <div class="stat-card">
-                <div class="stat-label">Requests · Last Day</div>
-                <div class="stat-value" id="stat-last-day">—</div>
-                <div class="stat-sub" id="stat-last-day-sub"></div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Requests · All Time</div>
-                <div class="stat-value" id="stat-all-time">—</div>
-                <div class="stat-sub">Across all tracked dates</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Services Tracked</div>
-                <div class="stat-value" id="stat-services">—</div>
-                <div class="stat-sub">Workers + Pages</div>
-            </div>
-            <div class="stat-card stat-card-top">
-                <div class="stat-label">Top Service</div>
-                <div class="stat-value" id="stat-top">—</div>
-                <div class="stat-sub">By total requests</div>
-            </div>
-        </section>
-
-        <section class="panel">
-            <div class="section-head">
-                <h2>📊 Daily Request Totals</h2>
-                <p>Per-service Cloudflare request counts, newest day last</p>
-            </div>
-            <div class="table-wrapper">
-                <table>
-                    <thead id="table-head"></thead>
-                    <tbody id="table-body"></tbody>
-                </table>
-            </div>
-        </section>
-
-        <section class="panel chart-section">
-            <div class="section-head">
-                <h2>🏆 Request Ranking</h2>
-                <p>All services ranked by total requests</p>
-            </div>
-            <div id="chart-bars"></div>
-        </section>
-
-        <section class="panel trending-section">
-            <div class="section-head">
-                <h2>📈 Trending</h2>
-                <p>Top 3 services by day-over-day growth between the two most recent days</p>
-            </div>
-            <div class="trending-grid" id="trending-grid"></div>
-        </section>
-
-        <footer>
-            Generated by big-pickle · <span id="footer-updated"></span> · Data: Cloudflare GraphQL Analytics
-        </footer>
+<div class="dashboard">
+  <header>
+    <div class="title-wrap">
+      <h1>🎮 Game Statistics Dashboard</h1>
+      <div class="tagline">Daily Cloudflare request counts · Games &amp; Services</div>
     </div>
+    <div class="updated">Updated <strong id="updatedAt">–</strong></div>
+  </header>
 
-    <script>
-        const DATA = {
-            "updatedAt": "2026-08-10T07:04:08.235Z",
-            "services": [
-                { "account": "d21711ae11a362bc4d57d4fd48deae61", "service": "trivia-rumble-elite", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 0, "2026-08-07": 145, "2026-08-08": 19286, "2026-08-09": 6451, "2026-08-10": 5829 } },
-                { "account": "d21711ae11a362bc4d57d4fd48deae61", "service": "stickman-rumble", "platform": "worker", "kind": "worker", "daily": { "2026-08-07": 0, "2026-08-08": 11363, "2026-08-09": 15390, "2026-08-10": 3029 } },
-                { "account": "d21711ae11a362bc4d57d4fd48deae61", "service": "english-trivia", "platform": "worker", "kind": "worker", "daily": { "2026-08-07": 0, "2026-08-08": 8747, "2026-08-09": 5546, "2026-08-10": 2196 } },
-                { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "snakeworld1", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 8137, "2026-08-07": 4, "2026-08-08": 3955, "2026-08-09": 2674, "2026-08-10": 0 } },
-                { "account": "d21711ae11a362bc4d57d4fd48deae61", "service": "bible-trivia", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 2079, "2026-08-09": 5354, "2026-08-10": 5733 } },
-                { "account": "d21711ae11a362bc4d57d4fd48deae61", "service": "quran-trivia", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 3043, "2026-08-09": 5531, "2026-08-10": 3838 } },
-                { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "arrow-blast", "platform": "pages", "kind": "pages", "daily": { "2026-08-06": 5988, "2026-08-07": 846, "2026-08-08": 517, "2026-08-09": 209, "2026-08-10": 17 } },
-                { "account": "d21711ae11a362bc4d57d4fd48deae61", "service": "bible-songs", "platform": "worker", "kind": "worker", "daily": { "2026-08-07": 0, "2026-08-08": 2292, "2026-08-09": 3849, "2026-08-10": 169 } },
-                { "account": "d21711ae11a362bc4d57d4fd48deae61", "service": "dice-arena", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 782, "2026-08-07": 908, "2026-08-08": 2287, "2026-08-09": 402, "2026-08-10": 77 } },
-                { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "pop-party", "platform": "pages", "kind": "pages", "daily": { "2026-08-06": 3145, "2026-08-07": 9, "2026-08-08": 176, "2026-08-09": 90, "2026-08-10": 0 } },
-                { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "discord-activity-test", "platform": "pages", "kind": "pages", "daily": { "2026-08-06": 2373, "2026-08-07": 160, "2026-08-08": 42, "2026-08-09": 284, "2026-08-10": 1 } },
-                { "account": "d21711ae11a362bc4d57d4fd48deae61", "service": "islamic-trivia", "platform": "worker", "kind": "worker", "daily": { "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 667 } },
-                { "account": "d21711ae11a362bc4d57d4fd48deae61", "service": "brick-breaker", "platform": "worker", "kind": "worker", "daily": { "2026-08-08": 0, "2026-08-09": 566, "2026-08-10": 32 } },
-                { "account": "d21711ae11a362bc4d57d4fd48deae61", "service": "bluff-dice", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 111, "2026-08-07": 238, "2026-08-08": 21, "2026-08-09": 209, "2026-08-10": 15 } },
-                { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "youtrivia", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 0, "2026-08-07": 7, "2026-08-08": 8, "2026-08-09": 2, "2026-08-10": 1 } },
-                { "account": "d21711ae11a362bc4d57d4fd48deae61", "service": "opencode-proxy", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 0, "2026-08-07": 12, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0 } },
-                { "account": "d21711ae11a362bc4d57d4fd48deae61", "service": "audiobooks", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 2 } },
-                { "account": "d21711ae11a362bc4d57d4fd48deae61", "service": "youstream-proxy", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0 } },
-                { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "bible-game-telegram", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0 } },
-                { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "casino", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0 } },
-                { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "pop-party", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0 } },
-                { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "pop-the-balloon", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0 } },
-                { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "snakeworld1-telegram-bot", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0 } },
-                { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "trivia-rumble-3", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0 } },
-                { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "voice-vibes", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0 } },
-                { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "wstest-probe2", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0 } },
-                { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "bible-game", "platform": "pages", "kind": "pages", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0 } },
-                { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "casino", "platform": "pages", "kind": "pages", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0 } },
-                { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "voice-vibes", "platform": "pages", "kind": "pages", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0 } },
-                { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "hindsight", "platform": "pages", "kind": "pages", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0 } }
-            ]
-        };
+  <section class="cards" id="cards"></section>
 
-        (function init() {
-            const app = document.getElementById('dashboard');
-            if (!DATA.services || DATA.services.length === 0) {
-                app.innerHTML = '<div class="empty">No data collected yet</div>';
-                return;
-            }
+  <section class="panel">
+    <h2>Daily Requests by Service</h2>
+    <div class="table-wrap">
+      <table>
+        <thead id="tableHead"></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+    <p class="table-note">* Trend compares the two most recent days with data (<span id="trendRange">–</span>). &nbsp;🎮 = game service · 🛠 = infrastructure.</p>
+  </section>
 
-            const formatNumber = n => new Intl.NumberFormat('en-US').format(n);
-            const escapeHtml = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  <div class="grid-2">
+    <section class="panel">
+      <h2>🏆 Total Requests Ranking</h2>
+      <div id="barChart"></div>
+    </section>
+    <section class="panel">
+      <h2>📈 Trending Movers</h2>
+      <div id="trending"></div>
+      <p class="table-note">Ranked by absolute request change between <span id="trendRange2">–</span>. Top 3 services with the biggest growth (or least decline).</p>
+    </section>
+  </div>
 
-            const dates = [...new Set(DATA.services.flatMap(s => Object.keys(s.daily)))].sort();
-            const lastDate = dates[dates.length - 1];
+  <footer>Generated by big-pickle · <span id="updatedAtFooter">–</span> · Data: Cloudflare GraphQL Analytics</footer>
+</div>
 
-            const GAME_KEYWORDS = ['trivia', 'rumble', 'bible', 'quran', 'dice', 'bluff', 'snake', 'pop', 'casino', 'voice', 'youtrivia', 'brick', 'arrow', 'stickman', 'balloon', 'song', 'game'];
-            const isGame = name => GAME_KEYWORDS.some(k => name.toLowerCase().includes(k));
+<script>
+const RAW_DATA = {
+  "updatedAt": "2026-08-11T06:42:18.579Z",
+  "services": [
+    { "account": "d21711ae11a362bc4d57d4fd48deae61", "service": "bible-songs", "platform": "worker", "kind": "worker", "daily": { "2026-08-07": 0, "2026-08-08": 2292, "2026-08-09": 3849, "2026-08-10": 29523, "2026-08-11": 13337 } },
+    { "account": "d21711ae11a362bc4d57d4fd48deae61", "service": "stickman-rumble", "platform": "worker", "kind": "worker", "daily": { "2026-08-07": 0, "2026-08-08": 11363, "2026-08-09": 15390, "2026-08-10": 15551, "2026-08-11": 3883 } },
+    { "account": "d21711ae11a362bc4d57d4fd48deae61", "service": "trivia-rumble-elite", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 0, "2026-08-07": 145, "2026-08-08": 19286, "2026-08-09": 6451, "2026-08-10": 10719, "2026-08-11": 6300 } },
+    { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "snakeworld1", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 8137, "2026-08-07": 4, "2026-08-08": 3955, "2026-08-09": 2674, "2026-08-10": 9955, "2026-08-11": 4050 } },
+    { "account": "d21711ae11a362bc4d57d4fd48deae61", "service": "english-trivia", "platform": "worker", "kind": "worker", "daily": { "2026-08-07": 0, "2026-08-08": 8747, "2026-08-09": 5546, "2026-08-10": 3093, "2026-08-11": 631 } },
+    { "account": "d21711ae11a362bc4d57d4fd48deae61", "service": "quran-trivia", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 3043, "2026-08-09": 5531, "2026-08-10": 6151, "2026-08-11": 73 } },
+    { "account": "d21711ae11a362bc4d57d4fd48deae61", "service": "bible-trivia", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 2079, "2026-08-09": 5354, "2026-08-10": 6225, "2026-08-11": 93 } },
+    { "account": "d21711ae11a362bc4d57d4fd48deae61", "service": "islamic-trivia", "platform": "worker", "kind": "worker", "daily": { "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 6912, "2026-08-11": 2600 } },
+    { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "arrow-blast", "platform": "pages", "kind": "pages", "daily": { "2026-08-06": 5988, "2026-08-07": 846, "2026-08-08": 517, "2026-08-09": 209, "2026-08-10": 272, "2026-08-11": 172 } },
+    { "account": "d21711ae11a362bc4d57d4fd48deae61", "service": "dice-arena", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 782, "2026-08-07": 908, "2026-08-08": 2287, "2026-08-09": 402, "2026-08-10": 360, "2026-08-11": 155 } },
+    { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "pop-party", "platform": "pages", "kind": "pages", "daily": { "2026-08-06": 3145, "2026-08-07": 9, "2026-08-08": 176, "2026-08-09": 90, "2026-08-10": 145, "2026-08-11": 0 } },
+    { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "discord-activity-test", "platform": "pages", "kind": "pages", "daily": { "2026-08-06": 2373, "2026-08-07": 160, "2026-08-08": 42, "2026-08-09": 284, "2026-08-10": 92, "2026-08-11": 19 } },
+    { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "voice-vibes", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0, "2026-08-11": 783 } },
+    { "account": "d21711ae11a362bc4d57d4fd48deae61", "service": "bluff-dice", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 111, "2026-08-07": 238, "2026-08-08": 21, "2026-08-09": 209, "2026-08-10": 25, "2026-08-11": 0 } },
+    { "account": "d21711ae11a362bc4d57d4fd48deae61", "service": "brick-breaker", "platform": "worker", "kind": "worker", "daily": { "2026-08-08": 0, "2026-08-09": 566, "2026-08-10": 33, "2026-08-11": 0 } },
+    { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "youtrivia", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 0, "2026-08-07": 7, "2026-08-08": 8, "2026-08-09": 2, "2026-08-10": 4, "2026-08-11": 0 } },
+    { "account": "d21711ae11a362bc4d57d4fd48deae61", "service": "opencode-proxy", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 0, "2026-08-07": 12, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0, "2026-08-11": 0 } },
+    { "account": "d21711ae11a362bc4d57d4fd48deae61", "service": "audiobooks", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 2, "2026-08-11": 0 } },
+    { "account": "d21711ae11a362bc4d57d4fd48deae61", "service": "youstream-proxy", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0, "2026-08-11": 0 } },
+    { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "bible-game-telegram", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0, "2026-08-11": 0 } },
+    { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "casino", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0, "2026-08-11": 0 } },
+    { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "pop-party", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0, "2026-08-11": 0 } },
+    { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "pop-the-balloon", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0, "2026-08-11": 0 } },
+    { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "snakeworld1-telegram-bot", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0, "2026-08-11": 0 } },
+    { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "trivia-rumble-3", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0, "2026-08-11": 0 } },
+    { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "wstest-probe2", "platform": "worker", "kind": "worker", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0, "2026-08-11": 0 } },
+    { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "bible-game", "platform": "pages", "kind": "pages", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0, "2026-08-11": 0 } },
+    { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "casino", "platform": "pages", "kind": "pages", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0, "2026-08-11": 0 } },
+    { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "voice-vibes", "platform": "pages", "kind": "pages", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0, "2026-08-11": 0 } },
+    { "account": "2b4b9a55f950042b9f9bcea76eb24b08", "service": "hindsight", "platform": "pages", "kind": "pages", "daily": { "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0, "2026-08-11": 0 } }
+  ]
+};
 
-            const rows = DATA.services.map(s => {
-                const dailyValues = dates.map(d => s.daily[d] || 0);
-                const total = dailyValues.reduce((a, b) => a + b, 0);
-                const lastVal = dailyValues[dailyValues.length - 1] || 0;
-                const prevVal = dailyValues.length > 1 ? (dailyValues[dailyValues.length - 2] || 0) : null;
-                const delta = prevVal === null ? null : lastVal - prevVal;
-                return { service: s, dailyValues, total, lastVal, prevVal, delta, game: isGame(s.service) };
-            });
+const fmt = n => n.toLocaleString("en-US");
 
-            // Updated time
-            const updatedDate = new Date(DATA.updatedAt);
-            const updatedFormatted = isNaN(updatedDate.getTime()) ? DATA.updatedAt :
-                updatedDate.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
-            document.getElementById('header-updated').textContent = updatedFormatted;
-            document.getElementById('footer-updated').textContent = updatedFormatted;
-            document.getElementById('footer-updated').title = DATA.updatedAt;
+const services = (RAW_DATA.services || []).map(s => ({ ...s, daily: s.daily || {} }));
+const allDates = [...new Set(services.flatMap(s => Object.keys(s.daily)))].sort();
+const lastDate = allDates[allDates.length - 1] || null;
+const prevDate = allDates.length >= 2 ? allDates[allDates.length - 2] : null;
 
-            // Summary cards
-            const totalLastDay = rows.reduce((sum, r) => sum + r.lastVal, 0);
-            const totalAllTime = rows.reduce((sum, r) => sum + r.total, 0);
-            const topService = [...rows].sort((a, b) => b.total - a.total)[0];
+const GAME_PATTERN = /trivia|bible|quran|dice|bluff|snake|pop|casino|voice|balloon|brick|stickman|rumble|arena|song|arrow|game/i;
+const isGame = s => GAME_PATTERN.test(s.service);
 
-            document.getElementById('stat-last-day').textContent = formatNumber(totalLastDay);
-            document.getElementById('stat-last-day-sub').textContent = lastDate;
-            document.getElementById('stat-all-time').textContent = formatNumber(totalAllTime);
-            document.getElementById('stat-services').textContent = rows.length;
-            document.getElementById('stat-top').innerHTML = `${topService.game ? '🎮 ' : ''}${escapeHtml(topService.service.service)} <span style="font-size:13px;color:#6b7280;font-weight:500;">· ${formatNumber(topService.total)} req</span>`;
+const enriched = services.map(s => {
+  const vals = Object.values(s.daily);
+  const total = vals.reduce((a, b) => a + b, 0);
+  const lastVal = lastDate ? (s.daily[lastDate] || 0) : 0;
+  const prevVal = prevDate ? (s.daily[prevDate] || 0) : 0;
+  return { ...s, total, lastVal, prevVal, delta: lastVal - prevVal, game: isGame(s) };
+});
 
-            // Table
-            const sortedRows = [...rows].sort((a, b) => b.total - a.total);
-            const thead = document.getElementById('table-head');
-            thead.innerHTML = `<tr>
-                <th>Service</th>
-                <th>Account</th>
-                <th>Platform</th>
-                ${dates.map(d => `<th class="num" title="${d}">${d.slice(5)}</th>`).join('')}
-                <th class="num">Total</th>
-                <th>Trend</th>
-            </tr>`;
+const allTime = enriched.reduce((a, s) => a + s.total, 0);
+const lastDay = enriched.reduce((a, s) => a + s.lastVal, 0);
+const topService = [...enriched].sort((a, b) => b.total - a.total)[0];
 
-            const tbody = document.getElementById('table-body');
-            tbody.innerHTML = sortedRows.map(r => {
-                const trendCell = r.delta === null ? '<span class="trend-flat">—</span>'
-                    : r.delta > 0 ? `<span class="trend-up">▲ +${formatNumber(r.delta)}</span>`
-                        : r.delta < 0 ? `<span class="trend-down">▼ ${formatNumber(Math.abs(r.delta))}</span>`
-                            : '<span class="trend-flat">—</span>';
-                const serviceCell = `${r.game ? '<span class="game-icon">🎮</span> ' : ''}<span class="service-cell">${escapeHtml(r.service.service)}</span>${r.game ? '' : '<span class="infra-badge">infra</span>'}`;
-                const dateCells = r.dailyValues.map(v => `<td class="num${v === 0 ? ' zero' : ''}">${formatNumber(v)}</td>`).join('');
-                return `<tr class="${r.game ? 'game-row' : 'infra-row'}">
-                    <td>${serviceCell}</td>
-                    <td class="account-cell" title="${escapeHtml(r.service.account)}">${escapeHtml(r.service.account.slice(0, 8))}…</td>
-                    <td><span class="badge ${r.service.platform}">${escapeHtml(r.service.platform)}</span></td>
-                    ${dateCells}
-                    <td class="num total-cell">${formatNumber(r.total)}</td>
-                    <td>${trendCell}</td>
-                </tr>`;
-            }).join('');
+function renderUpdated() {
+  const text = new Date(RAW_DATA.updatedAt).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short", timeZone: "UTC" });
+  document.getElementById("updatedAt").textContent = text;
+  document.getElementById("updatedAtFooter").textContent = text;
+  const range = prevDate ? prevDate + " → " + lastDate : "–";
+  document.getElementById("trendRange").textContent = range;
+  document.getElementById("trendRange2").textContent = range;
+}
 
-            // Bar chart
-            const chartData = [...rows].filter(r => r.total > 0).sort((a, b) => b.total - a.total);
-            const chartEl = document.getElementById('chart-bars');
-            if (chartData.length === 0) {
-                chartEl.innerHTML = '<div class="empty">No data collected yet</div>';
-            } else {
-                const maxBar = chartData[0].total;
-                chartEl.innerHTML = chartData.map(r => `
-                    <div class="bar-row ${r.game ? '' : 'bar-infra'}">
-                        <div class="bar-label" title="${escapeHtml(r.service.service)}">${r.game ? '🎮 ' : ''}${escapeHtml(r.service.service)}</div>
-                        <div class="bar-track"><div class="bar-fill" style="width:${((r.total / maxBar) * 100).toFixed(2)}%"></div></div>
-                        <div class="bar-value">${formatNumber(r.total)}</div>
-                    </div>
-                `).join('');
-            }
+function renderCards() {
+  const el = document.getElementById("cards");
+  if (!topService) { el.innerHTML = ""; return; }
+  const cards = [
+    { label: "Requests · Last Day", value: fmt(lastDay), sub: "All services · " + lastDate, cls: "" },
+    { label: "Requests · All Time", value: fmt(allTime), sub: (allDates[0] || "–") + " → " + (lastDate || "–"), cls: "" },
+    { label: "Services Tracked", value: fmt(enriched.length), sub: "Workers & Pages combined", cls: "" },
+    { label: "Top Service", value: "🎮 " + topService.service, sub: fmt(topService.total) + " total requests", cls: "top-service" }
+  ];
+  el.innerHTML = cards.map(c =>
+    '<div class="card ' + c.cls + '">' +
+      '<div class="label">' + c.label + '</div>' +
+      '<div class="value">' + c.value + '</div>' +
+      '<div class="sub">' + c.sub + '</div>' +
+    '</div>'
+  ).join("");
+}
 
-            // Trending
-            const trending = [...rows].filter(r => r.delta !== null).sort((a, b) => b.delta - a.delta).slice(0, 3);
-            const trendGrid = document.getElementById('trending-grid');
-            if (trending.length === 0) {
-                trendGrid.innerHTML = '<div class="empty">Not enough data for trends</div>';
-            } else {
-                trendGrid.innerHTML = trending.map((r, i) => {
-                    const cls = r.delta > 0 ? 'trend-up' : r.delta < 0 ? 'trend-down' : 'trend-flat';
-                    const arrow = r.delta > 0 ? '▲' : r.delta < 0 ? '▼' : '—';
-                    const deltaLabel = r.delta > 0 ? `+${formatNumber(r.delta)}` : formatNumber(Math.abs(r.delta));
-                    return `<div class="trend-card ${r.game ? '' : 'trend-card-infra'}">
-                        <div class="trend-rank">#${i + 1} · ${r.delta > 0 ? 'Top Gainer' : r.delta < 0 ? 'Least Decline' : 'Steady'}</div>
-                        <div class="trend-service">${r.game ? '🎮 ' : ''}${escapeHtml(r.service.service)}</div>
-                        <div class="trend-delta ${cls}">${arrow} ${deltaLabel}</div>
-                        <div class="trend-sub">${formatNumber(r.prevVal)} → ${formatNumber(r.lastVal)} requests/day</div>
-                    </div>`;
-                }).join('');
-            }
-        })();
-    </script>
+function trendHtml(delta) {
+  const cls = delta > 0 ? "up" : delta < 0 ? "down" : "flat";
+  const arrow = delta > 0 ? "▲" : delta < 0 ? "▼" : "→";
+  return '<span class="trend ' + cls + '">' + arrow + " " + (delta > 0 ? "+" : "") + fmt(delta) + "</span>";
+}
+
+function renderTable() {
+  const sorted = [...enriched].sort((a, b) => b.total - a.total);
+  document.getElementById("tableHead").innerHTML =
+    "<tr><th>Service</th><th>Account</th><th>Platform</th>" +
+    allDates.map(d => "<th>" + d.slice(5) + "</th>").join("") +
+    "<th>Total</th><th>Trend*</th></tr>";
+
+  document.getElementById("tableBody").innerHTML = sorted.map(s => {
+    const badge = s.game ? '<span class="badge game">game</span>' : '<span class="badge infra">infra</span>';
+    const icon = s.game ? "🎮" : "🛠";
+    const acc = '<span title="' + s.account + '">' + s.account.slice(0, 10) + "…</span>";
+    const trend = s.total === 0 ? '<span class="trend flat">—</span>' : trendHtml(s.delta);
+    return '<tr class="' + (s.game ? "game" : "infra") + '">' +
+      "<td><span class=\"service-name\">" + icon + " " + s.service + "</span> " + badge + "</td>" +
+      "<td>" + acc + "</td>" +
+      "<td><span class=\"platform" + (s.platform === "pages" ? " platform-pages" : "") + "\">" + s.platform + "</span></td>" +
+      allDates.map(d => "<td>" + fmt(s.daily[d] || 0) + "</td>").join("") +
+      '<td class="total-cell">' + fmt(s.total) + "</td>" +
+      "<td>" + trend + "</td>" +
+    "</tr>";
+  }).join("");
+}
+
+function renderChart() {
+  const sorted = [...enriched].sort((a, b) => b.total - a.total);
+  const max = Math.max(...sorted.map(s => s.total), 1);
+  const el = document.getElementById("barChart");
+  el.innerHTML = sorted.map(s => {
+    const pct = s.total > 0 ? Math.max((s.total / max) * 100, 1.2) : 0;
+    return '<div class="bar-row' + (s.game ? "" : " infra") + '">' +
+      '<div class="bar-label" title="' + s.service + '">' + (s.game ? "🎮" : "🛠") + " " + s.service + "</div>" +
+      '<div class="bar-track"><div class="bar-fill" style="width:' + pct + '%"></div></div>' +
+      '<div class="bar-value">' + fmt(s.total) + "</div>" +
+    "</div>";
+  }).join("");
+}
+
+function renderTrending() {
+  const candidates = enriched.filter(s => s.total > 0).sort((a, b) => b.delta - a.delta).slice(0, 3);
+  const medals = ["🥇", "🥈", "🥉"];
+  const el = document.getElementById("trending");
+  if (!candidates.length) { el.innerHTML = '<p class="empty">No traffic to rank yet.</p>'; return; }
+  el.innerHTML = '<div class="trending-cards">' + candidates.map((s, i) => {
+    const cls = s.delta > 0 ? "up" : s.delta < 0 ? "down" : "flat";
+    const arrow = s.delta > 0 ? "▲" : s.delta < 0 ? "▼" : "→";
+    const sign = s.delta > 0 ? "+" : "";
+    return '<div class="trend-card">' +
+      '<div class="rank">' + medals[i] + " Rank #" + (i + 1) + "</div>" +
+      '<div class="name">' + (s.game ? "🎮" : "🛠") + " " + s.service + "</div>" +
+      '<div class="sub">' + prevDate + " → " + lastDate + "</div>" +
+      '<div class="delta ' + cls + '">' + arrow + " " + sign + fmt(s.delta) + " requests</div>" +
+    "</div>";
+  }).join("") + "</div>";
+}
+
+function init() {
+  renderUpdated();
+  if (!allDates.length || allTime === 0) {
+    document.getElementById("cards").innerHTML = '<div class="card"><div class="label">Status</div><div class="value">😴</div><div class="sub">No data collected yet</div></div>';
+    const colspan = 3 + allDates.length + 2;
+    document.getElementById("tableHead").innerHTML = "";
+    document.getElementById("tableBody").innerHTML = '<tr><td colspan="' + colspan + '" class="empty">No data collected yet</td></tr>';
+    document.getElementById("barChart").innerHTML = '<p class="empty">No data collected yet</p>';
+    document.getElementById("trending").innerHTML = '<p class="empty">No data collected yet</p>';
+    return;
+  }
+  renderCards();
+  renderTable();
+  renderChart();
+  renderTrending();
+}
+
+init();
+</script>
 </body>
 </html>
