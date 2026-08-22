@@ -1,378 +1,330 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>🎮 Game Statistics Dashboard</title>
 <style>
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --bg-body:#080c16;
-  --bg-primary:#0c1222;
-  --bg-card:#111b2e;
-  --bg-card-hover:#162036;
-  --bg-table-head:#0f1829;
-  --bg-table-row:#0c1424;
-  --bg-table-row-alt:#0e172a;
-  --accent:#f59e0b;
-  --accent-light:#fbbf24;
-  --accent-dim:rgba(245,158,11,0.10);
-  --accent-border:rgba(245,158,11,0.25);
-  --text:#f1f5f9;
-  --text-sec:#94a3b8;
-  --text-dim:#4b5563;
-  --text-muted:#2d3a4f;
-  --green:#22c55e;
-  --red:#ef4444;
-  --border:#1a2744;
-  --radius:10px;
-  --shadow:0 2px 12px rgba(0,0,0,0.35);
-}
-html{scroll-behavior:smooth}
-body{
-  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
-  background:var(--bg-body);
-  background-image:radial-gradient(ellipse at 20% 0%,rgba(245,158,11,0.04) 0%,transparent 60%),radial-gradient(ellipse at 80% 100%,rgba(34,197,94,0.03) 0%,transparent 50%);
-  color:var(--text);
-  min-height:100vh;
-  line-height:1.5;
-}
-.container{max-width:1440px;margin:0 auto;padding:24px 20px 40px}
-
-/* Header */
-.header{text-align:center;margin-bottom:32px;padding:32px 0 24px}
-.header h1{font-size:2.2rem;font-weight:800;letter-spacing:-0.5px;background:linear-gradient(135deg,var(--accent-light),var(--accent),#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.header .sub{color:var(--text-sec);font-size:0.95rem;margin-top:6px}
-
-/* Summary Cards */
-.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:36px}
-.stat-card{
-  background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);
-  padding:20px 22px;position:relative;overflow:hidden;transition:border-color .2s,transform .15s;
-}
-.stat-card:hover{border-color:var(--accent-border);transform:translateY(-2px)}
-.stat-card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,var(--accent),transparent);opacity:0.7;
-}
-.stat-card .label{font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-sec);font-weight:600}
-.stat-card .value{font-size:1.75rem;font-weight:800;color:var(--text);margin-top:6px}
-.stat-card .value.gold{color:var(--accent)}
-.stat-card .detail{font-size:0.78rem;color:var(--text-dim);margin-top:4px}
-
-/* Section Titles */
-.section-title{
-  font-size:1.15rem;font-weight:700;margin-bottom:18px;
-  display:flex;align-items:center;gap:10px;color:var(--text);
-}
-.section-title span{font-size:1.2rem}
-
-/* Trending */
-.trending{margin-bottom:36px}
-.trending-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
-.trend-card{
-  background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);
-  padding:18px 20px;display:flex;align-items:center;gap:16px;transition:border-color .2s;
-}
-.trend-card:hover{border-color:var(--accent-border)}
-.trend-rank{
-  width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-weight:800;font-size:1.1rem;flex-shrink:0;
-}
-.trend-rank.r1{background:linear-gradient(135deg,#f59e0b,#d97706);color:#0a0e1a}
-.trend-rank.r2{background:linear-gradient(135deg,#94a3b8,#64748b);color:#0a0e1a}
-.trend-rank.r3{background:linear-gradient(135deg,#b45309,#78350f);color:#fef3c7}
-.trend-info .trend-name{font-weight:700;font-size:0.95rem}
-.trend-info .trend-change{font-size:0.85rem;margin-top:2px}
-.trend-up{color:var(--green)}
-.trend-down{color:var(--red)}
-.trend-neutral{color:var(--text-dim)}
-
-/* Bar Chart */
-.chart-section{margin-bottom:36px}
-.bar-chart{display:flex;flex-direction:column;gap:8px}
-.bar-row{display:flex;align-items:center;gap:12px}
-.bar-label{
-  width:160px;flex-shrink:0;text-align:right;font-size:0.8rem;
-  font-weight:600;color:var(--text-sec);overflow:hidden;
-  text-overflow:ellipsis;white-space:nowrap;
-}
-.bar-label.dim{color:var(--text-dim)}
-.bar-track{flex:1;height:26px;background:var(--bg-primary);border-radius:4px;overflow:hidden;position:relative}
-.bar-fill{
-  height:100%;border-radius:4px;transition:width .8s cubic-bezier(.22,1,.36,1);
-  display:flex;align-items:center;padding:0 10px;min-width:0;
-}
-.bar-fill.game{background:linear-gradient(90deg,#b45309,#f59e0b,#fbbf24)}
-.bar-fill.infra{background:linear-gradient(90deg,#374151,#4b5563)}
-.bar-value{
-  font-size:0.75rem;font-weight:700;color:var(--text);white-space:nowrap;
-  text-shadow:0 1px 3px rgba(0,0,0,0.6);margin-left:auto;
-}
-.bar-value-outside{
-  font-size:0.75rem;font-weight:700;color:var(--text-sec);white-space:nowrap;
-  margin-left:8px;flex-shrink:0;width:80px;
-}
-
-/* Table */
-.table-section{margin-bottom:36px}
-.table-wrapper{
-  overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius);
-  background:var(--bg-primary);box-shadow:var(--shadow);
-  -webkit-overflow-scrolling:touch;
-}
-table{width:100%;border-collapse:collapse;white-space:nowrap;font-size:0.82rem}
-thead{position:sticky;top:0;z-index:2}
-thead th{
-  background:var(--bg-table-head);color:var(--text-sec);font-weight:700;
-  padding:12px 10px;text-align:right;border-bottom:2px solid var(--border);
-  cursor:pointer;user-select:none;transition:color .15s;
-  font-size:0.75rem;text-transform:uppercase;letter-spacing:0.5px;
-}
-thead th:first-child,thead th:nth-child(2),thead th:nth-child(3){text-align:left;padding-left:14px}
-thead th:hover{color:var(--accent)}
-thead th.sorted{color:var(--accent)}
-thead th .sort-arrow{margin-left:4px;font-size:0.65rem}
-tbody tr{transition:background .15s}
-tbody tr:nth-child(odd){background:var(--bg-table-row)}
-tbody tr:nth-child(even){background:var(--bg-table-row-alt)}
-tbody tr:hover{background:var(--bg-card-hover)}
-tbody td{padding:9px 10px;text-align:right;border-bottom:1px solid rgba(26,39,68,0.5)}
-tbody td:first-child{text-align:left;padding-left:14px;font-weight:600;color:var(--text);max-width:200px;overflow:hidden;text-overflow:ellipsis}
-tbody td:nth-child(2){text-align:left;padding-left:14px;font-size:0.72rem;color:var(--text-sec);font-family:'SF Mono',Monaco,Consolas,monospace}
-tbody td:nth-child(3){text-align:left;padding-left:14px}
-tbody td.total-col{font-weight:700;color:var(--accent-light)}
-tbody td.trend-col{font-weight:700;font-size:0.8rem}
-.trend-cell-up{color:var(--green)}
-.trend-cell-down{color:var(--red)}
-.trend-cell-flat{color:var(--text-dim)}
-.game-row{background:var(--accent-dim) !important}
-.game-badge{margin-right:4px;font-size:0.85rem}
-.infra-label{font-size:0.7rem;color:var(--text-dim);font-style:italic}
-.platform-badge{
-  display:inline-block;padding:2px 7px;border-radius:4px;font-size:0.7rem;
-  font-weight:700;text-transform:uppercase;letter-spacing:0.5px;
-}
-.platform-worker{background:rgba(99,102,241,0.15);color:#818cf8;border:1px solid rgba(99,102,241,0.25)}
-.platform-pages{background:rgba(34,197,94,0.15);color:#4ade80;border:1px solid rgba(34,197,94,0.25)}
-.cell-dim{color:var(--text-muted)}
-.cell-zero{color:var(--text-dim)}
-.cell-small{color:var(--text-sec)}
-.cell-mid{color:#fbbf24}
-.cell-large{color:var(--accent);font-weight:700}
-.no-data-msg{text-align:center;padding:60px 20px;color:var(--text-sec);font-size:1.1rem}
-
-/* Footer */
-.footer{
-  text-align:center;padding:24px 0;margin-top:16px;
-  border-top:1px solid var(--border);color:var(--text-dim);font-size:0.8rem;
-}
-.footer a{color:var(--accent);text-decoration:none}
-
-/* Responsive */
-@media(max-width:768px){
-  .container{padding:16px 12px 32px}
-  .header h1{font-size:1.6rem}
-  .summary{grid-template-columns:repeat(2,1fr);gap:10px}
-  .stat-card{padding:14px 16px}
-  .stat-card .value{font-size:1.3rem}
-  .bar-label{width:110px;font-size:0.72rem}
-  .trending-grid{grid-template-columns:1fr}
-}
-@media(max-width:480px){
-  .summary{grid-template-columns:1fr}
-}
+:root { --bg:#081c14; --card:#122b20; --card2:#183829; --border:#1f4a35; --text:#eef1fb; --muted:#93b8a8; --gold:#e8c468; --green:#3ecf8e; --red:#ff6b6b; }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:radial-gradient(1200px 600px at 50% -10%, #0f4a2e 0%, var(--bg) 55%) fixed, var(--bg); color:var(--text); font-family:"Segoe UI", system-ui, sans-serif; padding:24px; }
+h1 { font-size:26px; margin-bottom:4px; }
+.sub { color:var(--muted); font-size:13px; margin-bottom:20px; }
+.cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-bottom:24px; }
+.card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px; }
+.card .label { color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.5px; }
+.card .value { font-size:24px; font-weight:700; margin-top:6px; color:var(--gold); }
+.table-wrap { overflow-x:auto; background:var(--card); border:1px solid var(--border); border-radius:14px; }
+table { border-collapse:collapse; width:100%; font-size:13px; min-width:900px; }
+th, td { padding:9px 12px; text-align:right; border-bottom:1px solid var(--border); white-space:nowrap; }
+th { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.5px; background:var(--card2); position:sticky; top:0; }
+td:first-child, th:first-child { text-align:left; }
+td.svc { font-weight:600; }
+tr.game { background:rgba(232,196,104,.05); }
+tr.game td.svc { color:var(--gold); }
+tr.infra td { opacity:.55; }
+td.total { font-weight:700; color:var(--gold); }
+.plat { background:var(--card2); border:1px solid var(--border); border-radius:20px; padding:2px 8px; font-size:11px; color:var(--muted); }
+.bar-cell { width:160px; }
+.bar { height:10px; background:linear-gradient(90deg, var(--gold), #f5dfa0); border-radius:6px; margin-left:auto; }
+footer { margin-top:20px; color:var(--muted); font-size:12px; text-align:center; }
 </style>
 </head>
 <body>
-<div class="container">
-  <header class="header">
-    <h1>🎮 Game Statistics Dashboard</h1>
-    <p class="sub">Cloudflare Request Analytics · Games &amp; Services</p>
-  </header>
-  <div id="app"></div>
-  <footer class="footer">
-    Generated by big-pickle · <span id="ft-date"></span> · Data: Cloudflare GraphQL Analytics
-  </footer>
+<h1>🎮 Game Statistics Dashboard</h1>
+<p class="sub">Daily Cloudflare request counts · Workers + Pages · both accounts</p>
+<div class="cards">
+  <div class="card"><div class="label">Requests (last day: 2026-08-22)</div><div class="value">42,727</div></div>
+  <div class="card"><div class="label">Total requests (all time)</div><div class="value">936,147</div></div>
+  <div class="card"><div class="label">Services tracked</div><div class="value">35</div></div>
+  <div class="card"><div class="label">Updated</div><div class="value" style="font-size:15px">2026-08-22T06:18</div></div>
 </div>
-<script>
-const RAW = {"updatedAt":"2026-08-21T06:22:53.659Z","services":[{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"bible-songs","platform":"worker","kind":"worker","daily":{"2026-08-07":0,"2026-08-08":2292,"2026-08-09":3849,"2026-08-10":29523,"2026-08-11":31581,"2026-08-12":20747,"2026-08-13":3695,"2026-08-14":612,"2026-08-15":1267,"2026-08-16":9582,"2026-08-17":169,"2026-08-18":20714,"2026-08-19":17345,"2026-08-20":25443,"2026-08-21":78}},{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"stickman-rumble","platform":"worker","kind":"worker","daily":{"2026-08-07":0,"2026-08-08":11363,"2026-08-09":15390,"2026-08-10":15551,"2026-08-11":9896,"2026-08-12":41927,"2026-08-13":10413,"2026-08-14":9163,"2026-08-15":13084,"2026-08-16":5462,"2026-08-17":15253,"2026-08-18":13255,"2026-08-19":1619,"2026-08-20":4271,"2026-08-21":119}},{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"trivia-rumble-elite","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":145,"2026-08-08":19286,"2026-08-09":6451,"2026-08-10":10719,"2026-08-11":7995,"2026-08-12":23342,"2026-08-13":13146,"2026-08-14":9397,"2026-08-15":14238,"2026-08-16":13467,"2026-08-17":12453,"2026-08-18":11318,"2026-08-19":864,"2026-08-20":9266,"2026-08-21":2017}},{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"english-trivia","platform":"worker","kind":"worker","daily":{"2026-08-07":0,"2026-08-08":8747,"2026-08-09":5546,"2026-08-10":3093,"2026-08-11":7904,"2026-08-12":3962,"2026-08-13":4419,"2026-08-14":6537,"2026-08-15":5287,"2026-08-16":8126,"2026-08-17":17479,"2026-08-18":4455,"2026-08-19":11356,"2026-08-20":5816,"2026-08-21":2636}},{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"bible-trivia","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":2079,"2026-08-09":5354,"2026-08-10":6225,"2026-08-11":1974,"2026-08-12":1129,"2026-08-13":7152,"2026-08-14":2857,"2026-08-15":14880,"2026-08-16":4009,"2026-08-17":9053,"2026-08-18":15350,"2026-08-19":1442,"2026-08-20":5959,"2026-08-21":3902}},{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"islamic-trivia","platform":"worker","kind":"worker","daily":{"2026-08-08":0,"2026-08-09":0,"2026-08-10":6912,"2026-08-11":4756,"2026-08-12":4829,"2026-08-13":14552,"2026-08-14":13974,"2026-08-15":14178,"2026-08-16":7520,"2026-08-17":1739,"2026-08-18":1082,"2026-08-19":1275,"2026-08-20":1136,"2026-08-21":255}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"snakeworld1","platform":"worker","kind":"worker","daily":{"2026-08-06":8137,"2026-08-07":4,"2026-08-08":3955,"2026-08-09":2674,"2026-08-10":9955,"2026-08-11":4053,"2026-08-12":713,"2026-08-13":7691,"2026-08-14":0,"2026-08-15":2035,"2026-08-16":486,"2026-08-17":0,"2026-08-18":0,"2026-08-19":4,"2026-08-20":304,"2026-08-21":0}},{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"quran-trivia","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":3043,"2026-08-09":5531,"2026-08-10":6151,"2026-08-11":453,"2026-08-12":597,"2026-08-13":2033,"2026-08-14":2305,"2026-08-15":3291,"2026-08-16":3358,"2026-08-17":250,"2026-08-18":312,"2026-08-19":340,"2026-08-20":57,"2026-08-21":30}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"arrow-blast","platform":"pages","kind":"pages","daily":{"2026-08-06":5988,"2026-08-07":846,"2026-08-08":517,"2026-08-09":209,"2026-08-10":272,"2026-08-11":266,"2026-08-12":706,"2026-08-13":55,"2026-08-14":1512,"2026-08-15":587,"2026-08-16":3,"2026-08-17":541,"2026-08-18":631,"2026-08-19":197,"2026-08-20":59,"2026-08-21":2}},{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"dice-arena","platform":"worker","kind":"worker","daily":{"2026-08-06":782,"2026-08-07":908,"2026-08-08":2287,"2026-08-09":402,"2026-08-10":360,"2026-08-11":492,"2026-08-12":593,"2026-08-13":697,"2026-08-14":434,"2026-08-15":1237,"2026-08-16":355,"2026-08-17":814,"2026-08-18":357,"2026-08-19":338,"2026-08-20":398,"2026-08-21":80}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"pop-party","platform":"pages","kind":"pages","daily":{"2026-08-06":3145,"2026-08-07":9,"2026-08-08":176,"2026-08-09":90,"2026-08-10":145,"2026-08-11":14,"2026-08-12":115,"2026-08-13":18,"2026-08-14":314,"2026-08-15":1187,"2026-08-16":826,"2026-08-17":1824,"2026-08-18":57,"2026-08-19":258,"2026-08-20":50,"2026-08-21":268}},{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"brick-breaker","platform":"worker","kind":"worker","daily":{"2026-08-08":0,"2026-08-09":566,"2026-08-10":33,"2026-08-11":193,"2026-08-12":2196,"2026-08-13":225,"2026-08-14":23,"2026-08-15":401,"2026-08-16":137,"2026-08-17":323,"2026-08-18":0,"2026-08-19":2,"2026-08-20":604,"2026-08-21":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"discord-activity-test","platform":"pages","kind":"pages","daily":{"2026-08-06":2373,"2026-08-07":160,"2026-08-08":42,"2026-08-09":284,"2026-08-10":92,"2026-08-11":277,"2026-08-12":169,"2026-08-13":191,"2026-08-14":2,"2026-08-15":122,"2026-08-16":3,"2026-08-17":78,"2026-08-18":154,"2026-08-19":12,"2026-08-20":21,"2026-08-21":40}},{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"bluff-dice","platform":"worker","kind":"worker","daily":{"2026-08-06":111,"2026-08-07":238,"2026-08-08":21,"2026-08-09":209,"2026-08-10":25,"2026-08-11":5,"2026-08-12":248,"2026-08-13":26,"2026-08-14":83,"2026-08-15":318,"2026-08-16":67,"2026-08-17":276,"2026-08-18":14,"2026-08-19":67,"2026-08-20":0,"2026-08-21":1}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"voice-vibes","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0,"2026-08-09":0,"2026-08-10":0,"2026-08-11":797,"2026-08-12":0,"2026-08-13":0,"2026-08-14":0,"2026-08-15":0,"2026-08-16":0,"2026-08-17":0,"2026-08-18":0,"2026-08-19":0,"2026-08-20":0,"2026-08-21":0}},{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"repo-task-keeper","platform":"worker","kind":"worker","daily":{"2026-08-16":0,"2026-08-17":71,"2026-08-18":16,"2026-08-19":17,"2026-08-20":6,"2026-08-21":0}},{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"tiktok-reels","platform":"worker","kind":"worker","daily":{"2026-08-12":0,"2026-08-13":0,"2026-08-14":56,"2026-08-15":0,"2026-08-16":0,"2026-08-17":0,"2026-08-18":0,"2026-08-19":0,"2026-08-20":6,"2026-08-21":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"youtrivia","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":7,"2026-08-08":8,"2026-08-09":2,"2026-08-10":4,"2026-08-11":3,"2026-08-12":3,"2026-08-13":0,"2026-08-14":1,"2026-08-15":5,"2026-08-16":2,"2026-08-17":1,"2026-08-18":0,"2026-08-19":2,"2026-08-20":1,"2026-08-21":0}},{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"opencode-proxy","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":12,"2026-08-08":0,"2026-08-09":0,"2026-08-10":0,"2026-08-11":0,"2026-08-12":1,"2026-08-13":0,"2026-08-14":0,"2026-08-15":0,"2026-08-16":0,"2026-08-17":0,"2026-08-18":0,"2026-08-19":0,"2026-08-20":6,"2026-08-21":0}},{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"audiobooks","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0,"2026-08-09":0,"2026-08-10":2,"2026-08-11":0,"2026-08-12":0,"2026-08-13":0,"2026-08-14":0,"2026-08-15":8,"2026-08-16":0,"2026-08-17":0,"2026-08-18":0,"2026-08-19":0,"2026-08-20":0,"2026-08-21":0}},{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"youstream-proxy","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0,"2026-08-09":0,"2026-08-10":0,"2026-08-11":0,"2026-08-12":0,"2026-08-13":0,"2026-08-14":0,"2026-08-15":0,"2026-08-16":0,"2026-08-17":0,"2026-08-18":0,"2026-08-19":0,"2026-08-20":0,"2026-08-21":0}},{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"egress-probe","platform":"worker","kind":"worker","daily":{"2026-08-12":0,"2026-08-13":0,"2026-08-14":0,"2026-08-15":0,"2026-08-16":0,"2026-08-17":0,"2026-08-18":0,"2026-08-19":0,"2026-08-20":0,"2026-08-21":0}},{"account":"d21711ae11a362bc4d57d4fd48deae61","service":"odespace-3","platform":"worker","kind":"worker","daily":{"2026-08-16":0,"2026-08-17":0,"2026-08-18":0,"2026-08-19":0,"2026-08-20":0,"2026-08-21":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"bible-game-telegram","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0,"2026-08-09":0,"2026-08-10":0,"2026-08-11":0,"2026-08-12":0,"2026-08-13":0,"2026-08-14":0,"2026-08-15":0,"2026-08-16":0,"2026-08-17":0,"2026-08-18":0,"2026-08-19":0,"2026-08-20":0,"2026-08-21":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"casino","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0,"2026-08-09":0,"2026-08-10":0,"2026-08-11":0,"2026-08-12":0,"2026-08-13":0,"2026-08-14":0,"2026-08-15":0,"2026-08-16":0,"2026-08-17":0,"2026-08-18":0,"2026-08-19":0,"2026-08-20":0,"2026-08-21":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"pop-party","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0,"2026-08-09":0,"2026-08-10":0,"2026-08-11":0,"2026-08-12":0,"2026-08-13":0,"2026-08-14":0,"2026-08-15":0,"2026-08-16":0,"2026-08-17":0,"2026-08-18":0,"2026-08-19":0,"2026-08-20":0,"2026-08-21":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"pop-the-balloon","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0,"2026-08-09":0,"2026-08-10":0,"2026-08-11":0,"2026-08-12":0,"2026-08-13":0,"2026-08-14":0,"2026-08-15":0,"2026-08-16":0,"2026-08-17":0,"2026-08-18":0,"2026-08-19":0,"2026-08-20":0,"2026-08-21":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"snakeworld1-telegram-bot","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0,"2026-08-09":0,"2026-08-10":0,"2026-08-11":0,"2026-08-12":0,"2026-08-13":0,"2026-08-14":0,"2026-08-15":0,"2026-08-16":0,"2026-08-17":0,"2026-08-18":0,"2026-08-19":0,"2026-08-20":0,"2026-08-21":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"trivia-rumble-3","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0,"2026-08-09":0,"2026-08-10":0,"2026-08-11":0,"2026-08-12":0,"2026-08-13":0,"2026-08-14":0,"2026-08-15":0,"2026-08-16":0,"2026-08-17":0,"2026-08-18":0,"2026-08-19":0,"2026-08-20":0,"2026-08-21":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"wstest-probe2","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0,"2026-08-09":0,"2026-08-10":0,"2026-08-11":0,"2026-08-12":0,"2026-08-13":0,"2026-08-14":0,"2026-08-15":0,"2026-08-16":0,"2026-08-17":0,"2026-08-18":0,"2026-08-19":0,"2026-08-20":0,"2026-08-21":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"bible-game","platform":"pages","kind":"pages","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0,"2026-08-09":0,"2026-08-10":0,"2026-08-11":0,"2026-08-12":0,"2026-08-13":0,"2026-08-14":0,"2026-08-15":0,"2026-08-16":0,"2026-08-17":0,"2026-08-18":0,"2026-08-19":0,"2026-08-20":0,"2026-08-21":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"casino","platform":"pages","kind":"pages","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0,"2026-08-09":0,"2026-08-10":0,"2026-08-11":0,"2026-08-12":0,"2026-08-13":0,"2026-08-14":0,"2026-08-15":0,"2026-08-16":0,"2026-08-17":0,"2026-08-18":0,"2026-08-19":0,"2026-08-20":0,"2026-08-21":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"voice-vibes","platform":"pages","kind":"pages","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0,"2026-08-09":0,"2026-08-10":0,"2026-08-11":0,"2026-08-12":0,"2026-08-13":0,"2026-08-14":0,"2026-08-15":0,"2026-08-16":0,"2026-08-17":0,"2026-08-18":0,"2026-08-19":0,"2026-08-20":0,"2026-08-21":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"hindsight","platform":"pages","kind":"pages","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0,"2026-08-09":0,"2026-08-10":0,"2026-08-11":0,"2026-08-12":0,"2026-08-13":0,"2026-08-14":0,"2026-08-15":0,"2026-08-16":0,"2026-08-17":0,"2026-08-18":0,"2026-08-19":0,"2026-08-20":0,"2026-08-21":0}},{"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"egress-probe","platform":"worker","kind":"worker","daily":{"2026-08-12":0,"2026-08-13":0,"2026-08-14":0,"2026-08-15":0,"2026-08-16":0,"2026-08-17":0,"2026-08-18":0,"2026-08-19":0,"2026-08-20":0,"2026-08-21":0}}]};
-
-function fmt(n){return n==null?'—':n.toLocaleString('en-US')}
-function fmtShort(d){const m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];const p=d.split('-');return m[parseInt(p[1],10)-1]+' '+parseInt(p[2],10)}
-function isGame(name){
-  const n=name.toLowerCase();
-  const kw=['trivia','bible','quran','dice','bluff','snake','pop','casino','voice','youtrivia','rumble','brick','arrow','song','party','arena','balloon','break'];
-  return kw.some(k=>n.includes(k));
-}
-function shortAcct(a){return a.substring(0,8)+'…'}
-
-// Collect all dates
-const dateSet=new Set();
-RAW.services.forEach(s=>Object.keys(s.daily).forEach(d=>dateSet.add(d)));
-const ALL_DATES=[...dateSet].sort();
-const LAST_DATE=ALL_DATES[ALL_DATES.length-1];
-const PREV_DATE=ALL_DATES.length>1?ALL_DATES[ALL_DATES.length-2]:null;
-
-// Process services
-let services=RAW.services.map(s=>{
-  const total=Object.values(s.daily).reduce((a,b)=>a+b,0);
-  const game=isGame(s.service);
-  let growth=null;
-  if(PREV_DATE){
-    const lv=s.daily[LAST_DATE]||0;
-    const pv=s.daily[PREV_DATE]||0;
-    growth=lv-pv;
-  }
-  return {...s,total,game,growth};
-});
-
-// Sort by total desc
-services.sort((a,b)=>b.total-a.total);
-
-// Check if any data
-const hasData=services.some(s=>s.total>0);
-
-// Find top service
-const topService=services[0];
-
-// Compute summary stats
-const totalLastDay=services.reduce((a,s)=>a+(s.daily[LAST_DATE]||0),0);
-const totalAllTime=services.reduce((a,s)=>a+s.total,0);
-const numServices=services.length;
-
-// Trending - top 3 by growth
-const trending=[...services].filter(s=>s.growth!==null).sort((a,b)=>b.growth-a.growth).slice(0,3);
-
-// Bar chart - top 15 by total
-const barData=services.filter(s=>s.total>0).slice(0,15);
-const maxTotal=barData.length?barData[0].total:1;
-
-// Current sort state
-let sortCol='total';
-let sortDir=-1;
-
-function getSortVal(s,col){
-  if(col==='service')return s.service;
-  if(col==='account')return s.account;
-  if(col==='platform')return s.platform;
-  if(col==='total')return s.total;
-  if(col==='growth')return s.growth||0;
-  if(col.startsWith('day:'))return s.daily[col.substring(4)]||0;
-  return 0;
-}
-
-function sortServices(){
-  services.sort((a,b)=>{
-    let va=getSortVal(a,sortCol),vb=getSortVal(b,sortCol);
-    if(typeof va==='string')return sortDir*va.localeCompare(vb);
-    return sortDir*(va-vb);
-  });
-}
-
-function toggleSort(col){
-  if(sortCol===col)sortDir*=-1;
-  else{sortCol=col;sortDir=col==='service'?1:-1;}
-  renderTable();
-}
-
-function cellClass(val){
-  if(!val||val===0)return 'cell-zero';
-  if(val<100)return 'cell-small';
-  if(val<5000)return 'cell-mid';
-  return 'cell-large';
-}
-
-function render(){
-  const app=document.getElementById('app');
-  if(!hasData){
-    app.innerHTML='<div class="no-data-msg">🎮 No data collected yet</div>';
-    return;
-  }
-  let html='';
-  // Summary
-  html+=`<section class="summary">
-    <div class="stat-card"><div class="label">Last Day Requests (${fmtShort(LAST_DATE)})</div><div class="value gold">${fmt(totalLastDay)}</div><div class="detail">Across all ${numServices} services</div></div>
-    <div class="stat-card"><div class="label">All-Time Requests</div><div class="value">${fmt(totalAllTime)}</div><div class="detail">${ALL_DATES.length} days tracked</div></div>
-    <div class="stat-card"><div class="label">Services Tracked</div><div class="value">${numServices}</div><div class="detail">${services.filter(s=>s.game).length} games · ${services.filter(s=>!s.game).length} infra</div></div>
-    <div class="stat-card"><div class="label">🏆 Top Service (All-Time)</div><div class="value gold" style="font-size:1.1rem">${topService.service}</div><div class="detail">${fmt(topService.total)} total requests</div></div>
-  </section>`;
-
-  // Trending
-  html+=`<section class="trending"><div class="section-title"><span>📈</span> Trending — Top Growth (${fmtShort(PREV_DATE)} → ${fmtShort(LAST_DATE)})</div><div class="trending-grid">`;
-  trending.forEach((t,i)=>{
-    const rcls=i===0?'r1':i===1?'r2':'r3';
-    const sign=t.growth>0?'+':'';
-    const cls=t.growth>0?'trend-up':t.growth<0?'trend-down':'trend-neutral';
-    html+=`<div class="trend-card"><div class="trend-rank ${rcls}">${i+1}</div><div class="trend-info"><div class="trend-name">${t.game?'🎮 ':''}${t.service}</div><div class="trend-change ${cls}">${sign}${fmt(t.growth)} requests · ${sign}${((t.growth/((t.daily[PREV_DATE]||1)))*100).toFixed(0)}%</div></div></div>`;
-  });
-  html+=`</div></section>`;
-
-  // Bar chart
-  html+=`<section class="chart-section"><div class="section-title"><span>📊</span> Request Volume — Top ${barData.length}</div><div class="bar-chart">`;
-  barData.forEach(s=>{
-    const pct=Math.max((s.total/maxTotal)*100,1);
-    const cls=s.game?'game':'infra';
-    const lblCls=s.game?'':' dim';
-    html+=`<div class="bar-row"><div class="bar-label${lblCls}">${s.game?'🎮 ':''}${s.service}</div><div class="bar-track"><div class="bar-fill ${cls}" style="width:${pct}%"></div></div><div class="bar-value-outside">${fmt(s.total)}</div></div>`;
-  });
-  html+=`</div></section>`;
-
-  // Table
-  html+=`<section class="table-section"><div class="section-title"><span>📋</span> Detailed Breakdown</div><div class="table-wrapper"><table id="data-table"><thead><tr>`;
-  const cols=[
-    {key:'service',label:'Service'},
-    {key:'account',label:'Account'},
-    {key:'platform',label:'Platform'}
-  ];
-  ALL_DATES.forEach(d=>cols.push({key:'day:'+d,label:fmtShort(d)}));
-  cols.push({key:'total',label:'Total'});
-  cols.push({key:'growth',label:'Trend'});
-
-  cols.forEach(c=>{
-    const isSorted=sortCol===c.key;
-    const arrow=isSorted?(sortDir===1?'▲':'▼'):'';
-    const cls=isSorted?'sorted':'';
-    const align=(c.key==='service'||c.key==='account'||c.key==='platform')?'text-align:left;padding-left:14px':'text-align:right';
-    html+=`<th class="${cls}" style="${align}" onclick="toggleSort('${c.key}')">${c.label}${arrow?`<span class="sort-arrow">${arrow}</span>`:''}</th>`;
-  });
-  html+=`</tr></thead><tbody>`;
-
-  services.forEach(s=>{
-    const rowCls=s.game?'game-row':'';
-    html+=`<tr class="${rowCls}">`;
-    html+=`<td>${s.game?'<span class="game-badge">🎮</span>':''}${s.service}${s.game?'':'<br><span class="infra-label">infrastructure</span>'}</td>`;
-    html+=`<td>${shortAcct(s.account)}</td>`;
-    html+=`<td><span class="platform-badge platform-${s.platform}">${s.platform}</span></td>`;
-
-    ALL_DATES.forEach(d=>{
-      const v=s.daily[d];
-      if(v==null){
-        html+=`<td class="cell-dim">—</td>`;
-      } else {
-        html+=`<td class="${cellClass(v)}">${fmt(v)}</td>`;
-      }
-    });
-
-    html+=`<td class="total-col">${fmt(s.total)}</td>`;
-
-    if(s.growth!==null){
-      const sign=s.growth>0?'+':'';
-      const cls=s.growth>0?'trend-cell-up':s.growth<0?'trend-cell-down':'trend-cell-flat';
-      html+=`<td class="trend-col ${cls}">${s.growth===0?'—':`${sign}${fmt(s.growth)}`}</td>`;
-    } else {
-      html+=`<td class="trend-col trend-cell-flat">—</td>`;
-    }
-    html+=`</tr>`;
-  });
-
-  html+=`</tbody></table></div></section>`;
-
-  app.innerHTML=html;
-  document.getElementById('ft-date').textContent=RAW.updatedAt;
-}
-
-render();
-</script>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Service</th><th>Account</th><th>Platform</th><th>08-06</th><th>08-07</th><th>08-08</th><th>08-09</th><th>08-10</th><th>08-11</th><th>08-12</th><th>08-13</th><th>08-14</th><th>08-15</th><th>08-16</th><th>08-17</th><th>08-18</th><th>08-19</th><th>08-20</th><th>08-21</th><th>08-22</th><th>Total</th><th>Trend</th><th>Share</th></tr></thead>
+<tbody><tr class="game">
+        <td class="svc">🎮 bible-songs</td>
+        <td>d21711ae11a362bc4d57d4fd48deae61</td>
+        <td><span class="plat">worker</span></td>
+        <td>0</td><td>0</td><td>2,292</td><td>3,849</td><td>29,523</td><td>31,581</td><td>20,747</td><td>3,695</td><td>612</td><td>1,267</td><td>9,582</td><td>169</td><td>20,714</td><td>17,345</td><td>25,443</td><td>17,598</td><td>7,506</td>
+        <td class="total">191,923</td>
+        <td><span style="color:#ff6b6b">▼</span></td>
+        <td class="bar-cell"><div class="bar" style="width:100.0%"></div></td>
+      </tr><tr class="infra">
+        <td class="svc">🛠️ stickman-rumble</td>
+        <td>d21711ae11a362bc4d57d4fd48deae61</td>
+        <td><span class="plat">worker</span></td>
+        <td>0</td><td>0</td><td>11,363</td><td>15,390</td><td>15,551</td><td>9,896</td><td>41,927</td><td>10,413</td><td>9,163</td><td>13,084</td><td>5,462</td><td>15,253</td><td>13,255</td><td>1,619</td><td>4,271</td><td>12,343</td><td>5,191</td>
+        <td class="total">184,181</td>
+        <td><span style="color:#ff6b6b">▼</span></td>
+        <td class="bar-cell"><div class="bar" style="width:96.0%"></div></td>
+      </tr><tr class="game">
+        <td class="svc">🎮 trivia-rumble-elite</td>
+        <td>d21711ae11a362bc4d57d4fd48deae61</td>
+        <td><span class="plat">worker</span></td>
+        <td>0</td><td>145</td><td>19,286</td><td>6,451</td><td>10,719</td><td>7,995</td><td>23,342</td><td>13,146</td><td>9,397</td><td>14,238</td><td>13,467</td><td>12,453</td><td>11,318</td><td>864</td><td>9,266</td><td>5,850</td><td>23,769</td>
+        <td class="total">181,706</td>
+        <td><span style="color:#3ecf8e">▲</span></td>
+        <td class="bar-cell"><div class="bar" style="width:94.7%"></div></td>
+      </tr><tr class="game">
+        <td class="svc">🎮 english-trivia</td>
+        <td>d21711ae11a362bc4d57d4fd48deae61</td>
+        <td><span class="plat">worker</span></td>
+        <td>0</td><td>0</td><td>8,747</td><td>5,546</td><td>3,093</td><td>7,904</td><td>3,962</td><td>4,419</td><td>6,537</td><td>5,287</td><td>8,126</td><td>17,479</td><td>4,455</td><td>11,356</td><td>5,816</td><td>8,904</td><td>2,844</td>
+        <td class="total">104,475</td>
+        <td><span style="color:#ff6b6b">▼</span></td>
+        <td class="bar-cell"><div class="bar" style="width:54.4%"></div></td>
+      </tr><tr class="game">
+        <td class="svc">🎮 bible-trivia</td>
+        <td>d21711ae11a362bc4d57d4fd48deae61</td>
+        <td><span class="plat">worker</span></td>
+        <td>0</td><td>0</td><td>2,079</td><td>5,354</td><td>6,225</td><td>1,974</td><td>1,129</td><td>7,152</td><td>2,857</td><td>14,880</td><td>4,009</td><td>9,053</td><td>15,350</td><td>1,442</td><td>5,959</td><td>5,148</td><td>1,856</td>
+        <td class="total">84,467</td>
+        <td><span style="color:#ff6b6b">▼</span></td>
+        <td class="bar-cell"><div class="bar" style="width:44.0%"></div></td>
+      </tr><tr class="game">
+        <td class="svc">🎮 islamic-trivia</td>
+        <td>d21711ae11a362bc4d57d4fd48deae61</td>
+        <td><span class="plat">worker</span></td>
+        <td>0</td><td>0</td><td>0</td><td>0</td><td>6,912</td><td>4,756</td><td>4,829</td><td>14,552</td><td>13,974</td><td>14,178</td><td>7,520</td><td>1,739</td><td>1,082</td><td>1,275</td><td>1,136</td><td>2,507</td><td>825</td>
+        <td class="total">75,285</td>
+        <td><span style="color:#ff6b6b">▼</span></td>
+        <td class="bar-cell"><div class="bar" style="width:39.2%"></div></td>
+      </tr><tr class="game">
+        <td class="svc">🎮 snakeworld1</td>
+        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
+        <td><span class="plat">worker</span></td>
+        <td>8,137</td><td>4</td><td>3,955</td><td>2,674</td><td>9,955</td><td>4,053</td><td>713</td><td>7,691</td><td>0</td><td>2,035</td><td>486</td><td>0</td><td>0</td><td>4</td><td>304</td><td>0</td><td>0</td>
+        <td class="total">40,011</td>
+        <td><span style="color:#3ecf8e">▲</span></td>
+        <td class="bar-cell"><div class="bar" style="width:20.8%"></div></td>
+      </tr><tr class="game">
+        <td class="svc">🎮 quran-trivia</td>
+        <td>d21711ae11a362bc4d57d4fd48deae61</td>
+        <td><span class="plat">worker</span></td>
+        <td>0</td><td>0</td><td>3,043</td><td>5,531</td><td>6,151</td><td>453</td><td>597</td><td>2,033</td><td>2,305</td><td>3,291</td><td>3,358</td><td>250</td><td>312</td><td>340</td><td>57</td><td>111</td><td>79</td>
+        <td class="total">27,911</td>
+        <td><span style="color:#ff6b6b">▼</span></td>
+        <td class="bar-cell"><div class="bar" style="width:14.5%"></div></td>
+      </tr><tr class="game">
+        <td class="svc">🎮 arrow-blast</td>
+        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
+        <td><span class="plat">pages</span></td>
+        <td>5,988</td><td>846</td><td>517</td><td>209</td><td>272</td><td>266</td><td>706</td><td>55</td><td>1,512</td><td>587</td><td>3</td><td>541</td><td>631</td><td>197</td><td>59</td><td>1,493</td><td>68</td>
+        <td class="total">13,950</td>
+        <td><span style="color:#ff6b6b">▼</span></td>
+        <td class="bar-cell"><div class="bar" style="width:7.3%"></div></td>
+      </tr><tr class="game">
+        <td class="svc">🎮 dice-arena</td>
+        <td>d21711ae11a362bc4d57d4fd48deae61</td>
+        <td><span class="plat">worker</span></td>
+        <td>782</td><td>908</td><td>2,287</td><td>402</td><td>360</td><td>492</td><td>593</td><td>697</td><td>434</td><td>1,237</td><td>355</td><td>814</td><td>357</td><td>338</td><td>398</td><td>681</td><td>230</td>
+        <td class="total">11,365</td>
+        <td><span style="color:#ff6b6b">▼</span></td>
+        <td class="bar-cell"><div class="bar" style="width:5.9%"></div></td>
+      </tr><tr class="game">
+        <td class="svc">🎮 pop-party</td>
+        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
+        <td><span class="plat">pages</span></td>
+        <td>3,145</td><td>9</td><td>176</td><td>90</td><td>145</td><td>14</td><td>115</td><td>18</td><td>314</td><td>1,187</td><td>826</td><td>1,824</td><td>57</td><td>258</td><td>50</td><td>725</td><td>293</td>
+        <td class="total">9,246</td>
+        <td><span style="color:#ff6b6b">▼</span></td>
+        <td class="bar-cell"><div class="bar" style="width:4.8%"></div></td>
+      </tr><tr class="infra">
+        <td class="svc">🛠️ brick-breaker</td>
+        <td>d21711ae11a362bc4d57d4fd48deae61</td>
+        <td><span class="plat">worker</span></td>
+        <td>0</td><td>0</td><td>0</td><td>566</td><td>33</td><td>193</td><td>2,196</td><td>225</td><td>23</td><td>401</td><td>137</td><td>323</td><td>0</td><td>2</td><td>604</td><td>66</td><td>0</td>
+        <td class="total">4,769</td>
+        <td><span style="color:#ff6b6b">▼</span></td>
+        <td class="bar-cell"><div class="bar" style="width:2.5%"></div></td>
+      </tr><tr class="infra">
+        <td class="svc">🛠️ discord-activity-test</td>
+        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
+        <td><span class="plat">pages</span></td>
+        <td>2,373</td><td>160</td><td>42</td><td>284</td><td>92</td><td>277</td><td>169</td><td>191</td><td>2</td><td>122</td><td>3</td><td>78</td><td>154</td><td>12</td><td>21</td><td>48</td><td>26</td>
+        <td class="total">4,054</td>
+        <td><span style="color:#ff6b6b">▼</span></td>
+        <td class="bar-cell"><div class="bar" style="width:2.1%"></div></td>
+      </tr><tr class="game">
+        <td class="svc">🎮 bluff-dice</td>
+        <td>d21711ae11a362bc4d57d4fd48deae61</td>
+        <td><span class="plat">worker</span></td>
+        <td>111</td><td>238</td><td>21</td><td>209</td><td>25</td><td>5</td><td>248</td><td>26</td><td>83</td><td>318</td><td>67</td><td>276</td><td>14</td><td>67</td><td>0</td><td>16</td><td>36</td>
+        <td class="total">1,760</td>
+        <td><span style="color:#3ecf8e">▲</span></td>
+        <td class="bar-cell"><div class="bar" style="width:0.9%"></div></td>
+      </tr><tr class="game">
+        <td class="svc">🎮 voice-vibes</td>
+        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
+        <td><span class="plat">worker</span></td>
+        <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>797</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+        <td class="total">797</td>
+        <td><span style="color:#3ecf8e">▲</span></td>
+        <td class="bar-cell"><div class="bar" style="width:0.4%"></div></td>
+      </tr><tr class="infra">
+        <td class="svc">🛠️ repo-task-keeper</td>
+        <td>d21711ae11a362bc4d57d4fd48deae61</td>
+        <td><span class="plat">worker</span></td>
+        <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>71</td><td>16</td><td>17</td><td>6</td><td>0</td><td>0</td>
+        <td class="total">110</td>
+        <td><span style="color:#3ecf8e">▲</span></td>
+        <td class="bar-cell"><div class="bar" style="width:0.1%"></div></td>
+      </tr><tr class="infra">
+        <td class="svc">🛠️ tiktok-reels</td>
+        <td>d21711ae11a362bc4d57d4fd48deae61</td>
+        <td><span class="plat">worker</span></td>
+        <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>56</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>6</td><td>1</td><td>1</td>
+        <td class="total">64</td>
+        <td><span style="color:#3ecf8e">▲</span></td>
+        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
+      </tr><tr class="game">
+        <td class="svc">🎮 youtrivia</td>
+        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
+        <td><span class="plat">worker</span></td>
+        <td>0</td><td>7</td><td>8</td><td>2</td><td>4</td><td>3</td><td>3</td><td>0</td><td>1</td><td>5</td><td>2</td><td>1</td><td>0</td><td>2</td><td>1</td><td>2</td><td>3</td>
+        <td class="total">44</td>
+        <td><span style="color:#3ecf8e">▲</span></td>
+        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
+      </tr><tr class="infra">
+        <td class="svc">🛠️ opencode-proxy</td>
+        <td>d21711ae11a362bc4d57d4fd48deae61</td>
+        <td><span class="plat">worker</span></td>
+        <td>0</td><td>12</td><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>6</td><td>0</td><td>0</td>
+        <td class="total">19</td>
+        <td><span style="color:#3ecf8e">▲</span></td>
+        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
+      </tr><tr class="infra">
+        <td class="svc">🛠️ audiobooks</td>
+        <td>d21711ae11a362bc4d57d4fd48deae61</td>
+        <td><span class="plat">worker</span></td>
+        <td>0</td><td>0</td><td>0</td><td>0</td><td>2</td><td>0</td><td>0</td><td>0</td><td>0</td><td>8</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+        <td class="total">10</td>
+        <td><span style="color:#3ecf8e">▲</span></td>
+        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
+      </tr><tr class="infra">
+        <td class="svc">🛠️ youstream-proxy</td>
+        <td>d21711ae11a362bc4d57d4fd48deae61</td>
+        <td><span class="plat">worker</span></td>
+        <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+        <td class="total">0</td>
+        <td><span style="color:#3ecf8e">▲</span></td>
+        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
+      </tr><tr class="infra">
+        <td class="svc">🛠️ egress-probe</td>
+        <td>d21711ae11a362bc4d57d4fd48deae61</td>
+        <td><span class="plat">worker</span></td>
+        <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+        <td class="total">0</td>
+        <td><span style="color:#3ecf8e">▲</span></td>
+        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
+      </tr><tr class="infra">
+        <td class="svc">🛠️ odespace-3</td>
+        <td>d21711ae11a362bc4d57d4fd48deae61</td>
+        <td><span class="plat">worker</span></td>
+        <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+        <td class="total">0</td>
+        <td><span style="color:#3ecf8e">▲</span></td>
+        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
+      </tr><tr class="game">
+        <td class="svc">🎮 bible-game-telegram</td>
+        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
+        <td><span class="plat">worker</span></td>
+        <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+        <td class="total">0</td>
+        <td><span style="color:#3ecf8e">▲</span></td>
+        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
+      </tr><tr class="game">
+        <td class="svc">🎮 casino</td>
+        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
+        <td><span class="plat">worker</span></td>
+        <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+        <td class="total">0</td>
+        <td><span style="color:#3ecf8e">▲</span></td>
+        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
+      </tr><tr class="game">
+        <td class="svc">🎮 pop-party</td>
+        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
+        <td><span class="plat">worker</span></td>
+        <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+        <td class="total">0</td>
+        <td><span style="color:#3ecf8e">▲</span></td>
+        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
+      </tr><tr class="game">
+        <td class="svc">🎮 pop-the-balloon</td>
+        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
+        <td><span class="plat">worker</span></td>
+        <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+        <td class="total">0</td>
+        <td><span style="color:#3ecf8e">▲</span></td>
+        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
+      </tr><tr class="game">
+        <td class="svc">🎮 snakeworld1-telegram-bot</td>
+        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
+        <td><span class="plat">worker</span></td>
+        <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+        <td class="total">0</td>
+        <td><span style="color:#3ecf8e">▲</span></td>
+        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
+      </tr><tr class="game">
+        <td class="svc">🎮 trivia-rumble-3</td>
+        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
+        <td><span class="plat">worker</span></td>
+        <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+        <td class="total">0</td>
+        <td><span style="color:#3ecf8e">▲</span></td>
+        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
+      </tr><tr class="infra">
+        <td class="svc">🛠️ wstest-probe2</td>
+        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
+        <td><span class="plat">worker</span></td>
+        <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+        <td class="total">0</td>
+        <td><span style="color:#3ecf8e">▲</span></td>
+        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
+      </tr><tr class="game">
+        <td class="svc">🎮 bible-game</td>
+        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
+        <td><span class="plat">pages</span></td>
+        <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+        <td class="total">0</td>
+        <td><span style="color:#3ecf8e">▲</span></td>
+        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
+      </tr><tr class="game">
+        <td class="svc">🎮 casino</td>
+        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
+        <td><span class="plat">pages</span></td>
+        <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+        <td class="total">0</td>
+        <td><span style="color:#3ecf8e">▲</span></td>
+        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
+      </tr><tr class="game">
+        <td class="svc">🎮 voice-vibes</td>
+        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
+        <td><span class="plat">pages</span></td>
+        <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+        <td class="total">0</td>
+        <td><span style="color:#3ecf8e">▲</span></td>
+        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
+      </tr><tr class="game">
+        <td class="svc">🎮 hindsight</td>
+        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
+        <td><span class="plat">pages</span></td>
+        <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+        <td class="total">0</td>
+        <td><span style="color:#3ecf8e">▲</span></td>
+        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
+      </tr><tr class="infra">
+        <td class="svc">🛠️ egress-probe</td>
+        <td>2b4b9a55f950042b9f9bcea76eb24b08</td>
+        <td><span class="plat">worker</span></td>
+        <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+        <td class="total">0</td>
+        <td><span style="color:#3ecf8e">▲</span></td>
+        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
+      </tr></tbody>
+</table>
+</div>
+<footer>Generated by big-pickle · 2026-08-22T06:18:00.852Z · Data: Cloudflare GraphQL Analytics</footer>
 </body>
 </html>
