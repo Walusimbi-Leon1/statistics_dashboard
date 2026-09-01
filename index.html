@@ -1,493 +1,1108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Game Statistics Dashboard</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      background: linear-gradient(145deg, #0b1a2e 0%, #10243a 100%);
-      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
-      color: #e2e9f2;
-      padding: 2rem 1.5rem;
-      min-height: 100vh;
-    }
-
-    .dashboard {
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
-    h1 {
-      font-size: 2.2rem;
-      font-weight: 600;
-      letter-spacing: 1px;
-      margin-bottom: 2rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      color: #f5e7c6;
-      text-shadow: 0 2px 10px rgba(212, 175, 55, 0.2);
-    }
-
-    h1 span {
-      font-size: 2.5rem;
-    }
-
-    .cards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 1rem;
-      margin-bottom: 2.5rem;
-    }
-
-    .stat-card {
-      background: rgba(20, 40, 60, 0.7);
-      backdrop-filter: blur(4px);
-      border: 1px solid #2c4a6b;
-      border-radius: 20px;
-      padding: 1.2rem 1rem;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-      transition: 0.2s;
-    }
-
-    .stat-card:hover {
-      border-color: #d4af37;
-      transform: translateY(-3px);
-    }
-
-    .stat-label {
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: #9bb5d4;
-      margin-bottom: 0.5rem;
-    }
-
-    .stat-value {
-      font-size: 1.9rem;
-      font-weight: 700;
-      color: #f5e7c6;
-      line-height: 1.2;
-    }
-
-    .stat-sub {
-      font-size: 0.8rem;
-      color: #7f9cbb;
-      margin-top: 0.3rem;
-    }
-
-    .table-container {
-      background: rgba(12, 25, 40, 0.7);
-      border-radius: 24px;
-      border: 1px solid #2c4a6b;
-      overflow-x: auto;
-      margin-bottom: 2.5rem;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(4px);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 1000px;
-      font-size: 0.9rem;
-    }
-
-    th {
-      background: #1a334d;
-      color: #d4af37;
-      font-weight: 600;
-      padding: 1rem 0.8rem;
-      text-align: right;
-      white-space: nowrap;
-      border-bottom: 2px solid #2c4a6b;
-    }
-
-    th:first-child, td:first-child {
-      text-align: left;
-      position: sticky;
-      left: 0;
-      background: #0e1f30;
-      z-index: 2;
-    }
-
-    td {
-      padding: 0.8rem 0.8rem;
-      border-bottom: 1px solid #1e3a52;
-      text-align: right;
-      white-space: nowrap;
-      color: #cbdae9;
-    }
-
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-    tbody tr:hover {
-      background: rgba(212, 175, 55, 0.05);
-    }
-
-    .service-name {
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .game-badge {
-      background: rgba(212, 175, 55, 0.12);
-      border-left: 3px solid #d4af37;
-    }
-
-    .game-badge .service-name {
-      color: #f5e7c6;
-    }
-
-    .infra-row {
-      opacity: 0.55;
-      filter: grayscale(0.5);
-    }
-
-    .infra-row .service-name {
-      color: #8ba3c0;
-    }
-
-    .trend-up {
-      color: #4cd964;
-      font-weight: 600;
-    }
-
-    .trend-down {
-      color: #ff5e5e;
-      font-weight: 600;
-    }
-
-    .trend-flat {
-      color: #a0b8d0;
-    }
-
-    .total-cell {
-      font-weight: 700;
-      color: #f5e7c6;
-    }
-
-    .bar-chart-section {
-      background: rgba(12, 25, 40, 0.7);
-      border-radius: 24px;
-      padding: 1.8rem 1.5rem;
-      border: 1px solid #2c4a6b;
-      margin-bottom: 2.5rem;
-      backdrop-filter: blur(4px);
-    }
-
-    .section-title {
-      font-size: 1.4rem;
-      font-weight: 600;
-      color: #f5e7c6;
-      margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .bar-row {
-      display: flex;
-      align-items: center;
-      margin-bottom: 0.8rem;
-      gap: 0.8rem;
-    }
-
-    .bar-label {
-      width: 180px;
-      text-align: right;
-      font-size: 0.85rem;
-      color: #b0c6de;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .bar-track {
-      flex: 1;
-      height: 24px;
-      background: #1a2f44;
-      border-radius: 30px;
-      overflow: hidden;
-      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5);
-    }
-
-    .bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #d4af37, #f0d78c);
-      border-radius: 30px;
-      box-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
-      min-width: 2px;
-      transition: width 0.3s ease;
-    }
-
-    .bar-value {
-      width: 100px;
-      font-size: 0.85rem;
-      color: #f5e7c6;
-      font-weight: 500;
-    }
-
-    .trending-section {
-      background: rgba(12, 25, 40, 0.7);
-      border-radius: 24px;
-      padding: 1.8rem 1.5rem;
-      border: 1px solid #2c4a6b;
-      margin-bottom: 2rem;
-    }
-
-    .trending-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1.5rem;
-    }
-
-    .trend-item {
-      background: #0e2032;
-      border-radius: 16px;
-      padding: 1rem 1.5rem;
-      flex: 1 1 200px;
-      border: 1px solid #2c4a6b;
-    }
-
-    .trend-item .service {
-      font-weight: 600;
-      color: #f5e7c6;
-      margin-bottom: 0.5rem;
-    }
-
-    .trend-item .growth {
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: #4cd964;
-    }
-
-    .trend-item .growth.negative {
-      color: #ff5e5e;
-    }
-
-    .footer {
-      text-align: center;
-      color: #7f9cbb;
-      font-size: 0.85rem;
-      margin-top: 2rem;
-      border-top: 1px solid #1e3a52;
-      padding-top: 1.5rem;
-    }
-
-    .emoji-icon {
-      font-size: 1.2rem;
-    }
-
-    .dim {
-      color: #6a86a3;
-    }
-
-    .no-data {
-      text-align: center;
-      padding: 4rem 2rem;
-      font-size: 1.2rem;
-      color: #a0b8d0;
-      background: rgba(12, 25, 40, 0.5);
-      border-radius: 24px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Statistics Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(145deg, #0a0f1a 0%, #0d1b2a 50%, #0a1628 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #e0e6ed;
+            min-height: 100vh;
+            padding: 2rem 1.5rem;
+        }
+        .dashboard {
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            color: #f5c542;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 10px rgba(245, 197, 66, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        h1 span {
+            font-size: 2.5rem;
+        }
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2.5rem;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #111c2e 0%, #0d1626 100%);
+            border: 1px solid #1e2d45;
+            border-radius: 16px;
+            padding: 1.5rem 1.25rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            border-color: #f5c542;
+        }
+        .stat-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #8a9bb5;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1.2;
+        }
+        .stat-value.gold {
+            color: #f5c542;
+        }
+        .stat-value.small {
+            font-size: 1.4rem;
+        }
+        .stat-sub {
+            font-size: 0.85rem;
+            color: #6c7a91;
+            margin-top: 0.5rem;
+        }
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 2.5rem 0 1.25rem;
+            color: #f5c542;
+            border-bottom: 2px solid #1e2d45;
+            padding-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid #1e2d45;
+            background: #0d1626;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            min-width: 900px;
+        }
+        thead {
+            background: #111c2e;
+            position: sticky;
+            top: 0;
+        }
+        th {
+            padding: 1rem 0.75rem;
+            text-align: right;
+            font-weight: 600;
+            color: #8a9bb5;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #1e2d45;
+            white-space: nowrap;
+        }
+        th:first-child, th:nth-child(2), th:nth-child(3) {
+            text-align: left;
+        }
+        td {
+            padding: 0.75rem;
+            text-align: right;
+            border-bottom: 1px solid #16233a;
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+        }
+        td:first-child, td:nth-child(2), td:nth-child(3) {
+            text-align: left;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        tbody tr {
+            transition: background 0.15s;
+        }
+        tbody tr:hover {
+            background: #111c2e;
+        }
+        .service-name {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .service-name .emoji {
+            font-size: 1.1rem;
+        }
+        .game-row {
+            background: rgba(245, 197, 66, 0.05);
+        }
+        .game-row:hover {
+            background: rgba(245, 197, 66, 0.1);
+        }
+        .game-row .service-name {
+            color: #f5c542;
+        }
+        .infra-row {
+            opacity: 0.55;
+        }
+        .infra-row .service-name {
+            color: #6c7a91;
+        }
+        .trend-up {
+            color: #4ade80;
+            font-weight: 600;
+        }
+        .trend-down {
+            color: #f87171;
+            font-weight: 600;
+        }
+        .trend-flat {
+            color: #6c7a91;
+        }
+        .total-cell {
+            font-weight: 700;
+            color: #ffffff;
+        }
+        .account-cell {
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: #8a9bb5;
+        }
+        .platform-badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .platform-worker {
+            background: #1e3a5f;
+            color: #93c5fd;
+        }
+        .platform-pages {
+            background: #2d3748;
+            color: #cbd5e1;
+        }
+        .chart-section {
+            margin-top: 2.5rem;
+        }
+        .chart-container {
+            background: #0d1626;
+            border: 1px solid #1e2d45;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+        .chart-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            gap: 1rem;
+        }
+        .chart-label {
+            width: 180px;
+            text-align: right;
+            font-size: 0.85rem;
+            color: #a0aec0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-shrink: 0;
+        }
+        .chart-bar-wrapper {
+            flex: 1;
+            background: #16233a;
+            border-radius: 6px;
+            height: 24px;
+            overflow: hidden;
+            position: relative;
+        }
+        .chart-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #f5c542, #fbbf24);
+            border-radius: 6px;
+            min-width: 2px;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px rgba(245, 197, 66, 0.3);
+        }
+        .chart-value {
+            width: 100px;
+            font-size: 0.85rem;
+            color: #ffffff;
+            font-weight: 600;
+            text-align: left;
+            flex-shrink: 0;
+        }
+        .trending-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+            margin-top: 1rem;
+        }
+        .trending-card {
+            background: linear-gradient(135deg, #111c2e 0%, #0d1626 100%);
+            border: 1px solid #1e2d45;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            transition: transform 0.2s ease;
+        }
+        .trending-card:hover {
+            transform: translateY(-3px);
+            border-color: #f5c542;
+        }
+        .trending-rank {
+            font-size: 0.8rem;
+            color: #f5c542;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+        .trending-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .trending-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+        .trending-change {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        .trending-change.positive {
+            color: #4ade80;
+        }
+        .trending-change.negative {
+            color: #f87171;
+        }
+        .trending-dates {
+            color: #6c7a91;
+            font-size: 0.8rem;
+        }
+        footer {
+            margin-top: 3rem;
+            text-align: center;
+            color: #4a5568;
+            font-size: 0.85rem;
+            padding: 1.5rem 0;
+            border-top: 1px solid #1e2d45;
+        }
+        .no-data {
+            text-align: center;
+            padding: 4rem 2rem;
+            font-size: 1.2rem;
+            color: #8a9bb5;
+        }
+        .no-data .emoji {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 1rem;
+        }
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            h1 {
+                font-size: 1.6rem;
+            }
+            .stat-value {
+                font-size: 1.5rem;
+            }
+            .chart-label {
+                width: 120px;
+            }
+            .chart-value {
+                width: 80px;
+            }
+        }
+    </style>
 </head>
 <body>
-<div class="dashboard">
-  <h1><span>🎮</span> Game Statistics Dashboard</h1>
+    <div class="dashboard">
+        <h1><span>🎮</span> Game Statistics Dashboard</h1>
 
-  <!-- data injection via script -->
-  <div id="app"></div>
-</div>
+        <div id="dashboard-content">
+            <!-- Content will be injected here -->
+        </div>
 
-<script>
-  (function() {
-    const rawData = {
-      "updatedAt": "2026-08-31T11:57:13.774Z",
-      "services": [
-        {"account":"d21711ae11a362bc4d57d4fd48deae61","service":"stickman-rumble","platform":"worker","kind":"worker","daily":{"2026-08-07":0,"2026-08-08":11363,"2026-08-09":15390,"2026-08-10":15551,"2026-08-11":9896,"2026-08-12":41927,"2026-08-13":10413,"2026-08-14":9163,"2026-08-15":13084,"2026-08-16":5462,"2026-08-17":15253,"2026-08-18":13255,"2026-08-19":1619,"2026-08-20":4271,"2026-08-21":12343,"2026-08-22":9461,"2026-08-23":1354,"2026-08-24":18809,"2026-08-25":4875,"2026-08-26":11095,"2026-08-27":1755,"2026-08-28":4338,"2026-08-29":36500,"2026-08-30":12820,"2026-08-31":8363},
-        {"account":"d21711ae11a362bc4d57d4fd48deae61","service":"trivia-rumble-elite","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":145,"2026-08-08":19286,"2026-08-09":6451,"2026-08-10":10719,"2026-08-11":7995,"2026-08-12":23342,"2026-08-13":13146,"2026-08-14":9397,"2026-08-15":14238,"2026-08-16":13467,"2026-08-17":12453,"2026-08-18":11318,"2026-08-19":864,"2026-08-20":9266,"2026-08-21":5850,"2026-08-22":33061,"2026-08-23":8357,"2026-08-24":15812,"2026-08-25":8397,"2026-08-26":11078,"2026-08-27":6566,"2026-08-28":12640,"2026-08-29":9835,"2026-08-30":3500,"2026-08-31":7880},
-        {"account":"d21711ae11a362bc4d57d4fd48deae61","service":"bible-songs","platform":"worker","kind":"worker","daily":{"2026-08-07":0,"2026-08-08":2292,"2026-08-09":3849,"2026-08-10":29523,"2026-08-11":31581,"2026-08-12":20747,"2026-08-13":3695,"2026-08-14":612,"2026-08-15":1267,"2026-08-16":9582,"2026-08-17":169,"2026-08-18":20714,"2026-08-19":17345,"2026-08-20":25443,"2026-08-21":17598,"2026-08-22":31698,"2026-08-23":1945,"2026-08-24":946,"2026-08-25":786,"2026-08-26":498,"2026-08-27":548,"2026-08-28":9936,"2026-08-29":26176,"2026-08-30":6316,"2026-08-31":2987},
-        {"account":"d21711ae11a362bc4d57d4fd48deae61","service":"english-trivia","platform":"worker","kind":"worker","daily":{"2026-08-07":0,"2026-08-08":8747,"2026-08-09":5546,"2026-08-10":3093,"2026-08-11":7904,"2026-08-12":3962,"2026-08-13":4419,"2026-08-14":6537,"2026-08-15":5287,"2026-08-16":8126,"2026-08-17":17479,"2026-08-18":4455,"2026-08-19":11356,"2026-08-20":5816,"2026-08-21":8904,"2026-08-22":9198,"2026-08-23":9764,"2026-08-24":6883,"2026-08-25":3340,"2026-08-26":11041,"2026-08-27":8231,"2026-08-28":5942,"2026-08-29":4410,"2026-08-30":2185,"2026-08-31":1887},
-        {"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"snakeworld1","platform":"worker","kind":"worker","daily":{"2026-08-06":8137,"2026-08-07":4,"2026-08-08":3955,"2026-08-09":2674,"2026-08-10":9955,"2026-08-11":4053,"2026-08-12":713,"2026-08-13":7691,"2026-08-14":0,"2026-08-15":2035,"2026-08-16":486,"2026-08-17":0,"2026-08-18":0,"2026-08-19":4,"2026-08-20":304,"2026-08-21":0,"2026-08-22":12501,"2026-08-23":1979,"2026-08-24":1,"2026-08-25":0,"2026-08-26":0,"2026-08-27":1145,"2026-08-28":47912,"2026-08-29":11717,"2026-08-30":29803,"2026-08-31":10},
-        {"account":"d21711ae11a362bc4d57d4fd48deae61","service":"bible-trivia","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":2079,"2026-08-09":5354,"2026-08-10":6225,"2026-08-11":1974,"2026-08-12":1129,"2026-08-13":7152,"2026-08-14":2857,"2026-08-15":14880,"2026-08-16":4009,"2026-08-17":9053,"2026-08-18":15350,"2026-08-19":1442,"2026-08-20":5959,"2026-08-21":5148,"2026-08-22":2546,"2026-08-23":1904,"2026-08-24":3183,"2026-08-25":6090,"2026-08-26":9095,"2026-08-27":1374,"2026-08-28":3908,"2026-08-29":3070,"2026-08-30":706,"2026-08-31":5694},
-        {"account":"d21711ae11a362bc4d57d4fd48deae61","service":"islamic-trivia","platform":"worker","kind":"worker","daily":{"2026-08-08":0,"2026-08-09":0,"2026-08-10":6912,"2026-08-11":4756,"2026-08-12":4829,"2026-08-13":14552,"2026-08-14":13974,"2026-08-15":14178,"2026-08-16":7520,"2026-08-17":1739,"2026-08-18":1082,"2026-08-19":1275,"2026-08-20":1136,"2026-08-21":2507,"2026-08-22":1254,"2026-08-23":1444,"2026-08-24":1201,"2026-08-25":751,"2026-08-26":2337,"2026-08-27":890,"2026-08-28":2293,"2026-08-29":3812,"2026-08-30":889,"2026-08-31":233},
-        {"account":"d21711ae11a362bc4d57d4fd48deae61","service":"quran-trivia","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":3043,"2026-08-09":5531,"2026-08-10":6151,"2026-08-11":453,"2026-08-12":597,"2026-08-13":2033,"2026-08-14":2305,"2026-08-15":3291,"2026-08-16":3358,"2026-08-17":250,"2026-08-18":312,"2026-08-19":340,"2026-08-20":57,"2026-08-21":111,"2026-08-22":92,"2026-08-23":135,"2026-08-24":148,"2026-08-25":141,"2026-08-26":163,"2026-08-27":50,"2026-08-28":44,"2026-08-29":128,"2026-08-30":57,"2026-08-31":0},
-        {"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"arrow-blast","platform":"pages","kind":"pages","daily":{"2026-08-06":5988,"2026-08-07":846,"2026-08-08":517,"2026-08-09":209,"2026-08-10":272,"2026-08-11":266,"2026-08-12":706,"2026-08-13":55,"2026-08-14":1512,"2026-08-15":587,"2026-08-16":3,"2026-08-17":541,"2026-08-18":631,"2026-08-19":197,"2026-08-20":59,"2026-08-21":1493,"2026-08-22":281,"2026-08-23":276,"2026-08-24":381,"2026-08-25":36,"2026-08-26":7,"2026-08-27":1298,"2026-08-28":202,"2026-08-29":120,"2026-08-30":9343,"2026-08-31":2},
-        {"account":"d21711ae11a362bc4d57d4fd48deae61","service":"dice-arena","platform":"worker","kind":"worker","daily":{"2026-08-06":782,"2026-08-07":908,"2026-08-08":2287,"2026-08-09":402,"2026-08-10":360,"2026-08-11":492,"2026-08-12":593,"2026-08-13":697,"2026-08-14":434,"2026-08-15":1237,"2026-08-16":355,"2026-08-17":814,"2026-08-18":357,"2026-08-19":338,"2026-08-20":398,"2026-08-21":681,"2026-08-22":543,"2026-08-23":1247,"2026-08-24":337,"2026-08-25":2567,"2026-08-26":335,"2026-08-27":377,"2026-08-28":750,"2026-08-29":374,"2026-08-30":709,"2026-08-31":148},
-        {"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"pop-party","platform":"pages","kind":"pages","daily":{"2026-08-06":3145,"2026-08-07":9,"2026-08-08":176,"2026-08-09":90,"2026-08-10":145,"2026-08-11":14,"2026-08-12":115,"2026-08-13":18,"2026-08-14":314,"2026-08-15":1187,"2026-08-16":826,"2026-08-17":1824,"2026-08-18":57,"2026-08-19":258,"2026-08-20":50,"2026-08-21":725,"2026-08-22":1926,"2026-08-23":694,"2026-08-24":48,"2026-08-25":62,"2026-08-26":269,"2026-08-27":34,"2026-08-28":459,"2026-08-29":1231,"2026-08-30":1407,"2026-08-31":37},
-        {"account":"d21711ae11a362bc4d57d4fd48deae61","service":"brick-breaker","platform":"worker","kind":"worker","daily":{"2026-08-08":0,"2026-08-09":566,"2026-08-10":33,"2026-08-11":193,"2026-08-12":2196,"2026-08-13":225,"2026-08-14":23,"2026-08-15":401,"2026-08-16":137,"2026-08-17":323,"2026-08-18":0,"2026-08-19":2,"2026-08-20":604,"2026-08-21":66,"2026-08-22":1,"2026-08-23":33,"2026-08-24":52,"2026-08-25":0,"2026-08-26":30,"2026-08-27":1,"2026-08-28":3,"2026-08-29":475,"2026-08-30":1,"2026-08-31":1},
-        {"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"discord-activity-test","platform":"pages","kind":"pages","daily":{"2026-08-06":2373,"2026-08-07":160,"2026-08-08":42,"2026-08-09":284,"2026-08-10":92,"2026-08-11":277,"2026-08-12":169,"2026-08-13":191,"2026-08-14":2,"2026-08-15":122,"2026-08-16":3,"2026-08-17":78,"2026-08-18":154,"2026-08-19":12,"2026-08-20":21,"2026-08-21":48,"2026-08-22":120,"2026-08-23":17,"2026-08-24":112,"2026-08-25":10,"2026-08-26":33,"2026-08-27":24,"2026-08-28":71,"2026-08-29":117,"2026-08-30":5,"2026-08-31":2},
-        {"account":"d21711ae11a362bc4d57d4fd48deae61","service":"bluff-dice","platform":"worker","kind":"worker","daily":{"2026-08-06":111,"2026-08-07":238,"2026-08-08":21,"2026-08-09":209,"2026-08-10":25,"2026-08-11":5,"2026-08-12":248,"2026-08-13":26,"2026-08-14":83,"2026-08-15":318,"2026-08-16":67,"2026-08-17":276,"2026-08-18":14,"2026-08-19":67,"2026-08-20":0,"2026-08-21":16,"2026-08-22":47,"2026-08-23":187,"2026-08-24":0,"2026-08-25":96,"2026-08-26":64,"2026-08-27":4,"2026-08-28":127,"2026-08-29":18,"2026-08-30":20,"2026-08-31":0},
-        {"account":"d21711ae11a362bc4d57d4fd48deae61","service":"memory-cascade","platform":"worker","kind":"worker","daily":{"2026-08-26":0,"2026-08-27":0,"2026-08-28":234,"2026-08-29":285,"2026-08-30":306,"2026-08-31":157},
-        {"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"voice-vibes","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0,"2026-08-09":0,"2026-08-10":0,"2026-08-11":797,"2026-08-12":0,"2026-08-13":0,"2026-08-14":0,"2026-08-15":0,"2026-08-16":0,"2026-08-17":0,"2026-08-18":0,"2026-08-19":0,"2026-08-20":0,"2026-08-21":0,"2026-08-22":0,"2026-08-23":0,"2026-08-24":0,"2026-08-25":0,"2026-08-26":0,"2026-08-27":0,"2026-08-28":0,"2026-08-29":0,"2026-08-30":0,"2026-08-31":0},
-        {"account":"d21711ae11a362bc4d57d4fd48deae61","service":"repo-task-keeper","platform":"worker","kind":"worker","daily":{"2026-08-16":0,"2026-08-17":71,"2026-08-18":16,"2026-08-19":17,"2026-08-20":6,"2026-08-21":0,"2026-08-22":0,"2026-08-23":7,"2026-08-24":4,"2026-08-25":1,"2026-08-26":0,"2026-08-27":0,"2026-08-28":0,"2026-08-29":1,"2026-08-30":0,"2026-08-31":0},
-        {"account":"d21711ae11a362bc4d57d4fd48deae61","service":"tiktok-reels","platform":"worker","kind":"worker","daily":{"2026-08-12":0,"2026-08-13":0,"2026-08-14":56,"2026-08-15":0,"2026-08-16":0,"2026-08-17":0,"2026-08-18":0,"2026-08-19":0,"2026-08-20":6,"2026-08-21":1,"2026-08-22":3,"2026-08-23":1,"2026-08-24":1,"2026-08-25":10,"2026-08-26":1,"2026-08-27":3,"2026-08-28":1,"2026-08-29":3,"2026-08-30":1,"2026-08-31":1},
-        {"account":"2b4b9a55f950042b9f9bcea76eb24b08","service":"youtrivia","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":7,"2026-08-08":8,"2026-08-09":2,"2026-08-10":4,"2026-08-11":3,"2026-08-12":3,"2026-08-13":0,"2026-08-14":1,"2026-08-15":5,"2026-08-16":2,"2026-08-17":1,"2026-08-18":0,"2026-08-19":2,"2026-08-20":1,"2026-08-21":2,"2026-08-22":4,"2026-08-23":1,"2026-08-24":1,"2026-08-25":3,"2026-08-26":0,"2026-08-27":0,"2026-08-28":0,"2026-08-29":6,"2026-08-30":1,"2026-08-31":1},
-        {"account":"d21711ae11a362bc4d57d4fd48deae61","service":"oc-chat","platform":"worker","kind":"worker","daily":{"2026-08-27":0,"2026-08-28":0,"2026-08-29":54,"2026-08-30":0,"2026-08-31":0},
-        {"account":"d21711ae11a362bc4d57d4fd48deae61","service":"opencode-proxy","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":12,"2026-08-08":0,"2026-08-09":0,"2026-08-10":0,"2026-08-11":0,"2026-08-12":1,"2026-08-13":0,"2026-08-14":0,"2026-08-15":0,"2026-08-16":0,"2026-08-17":0,"2026-08-18":0,"2026-08-19":0,"2026-08-20":6,"2026-08-21":0,"2026-08-22":0,"2026-08-23":0,"2026-08-24":0,"2026-08-25":0,"2026-08-26":0,"2026-08-27":0,"2026-08-28":0,"2026-08-29":0,"2026-08-30":0,"2026-08-31":0},
-        {"account":"d21711ae11a362bc4d57d4fd48deae61","service":"audiobooks","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0,"2026-08-09":0,"2026-08-10":2,"2026-08-11":0,"2026-08-12":0,"2026-08-13":0,"2026-08-14":0,"2026-08-15":8,"2026-08-16":0,"2026-08-17":0,"2026-08-18":0,"2026-08-19":0,"2026-08-20":0,"2026-08-21":0,"2026-08-22":0,"2026-08-23":0,"2026-08-24":0,"2026-08-25":0,"2026-08-26":0,"2026-08-27":1,"2026-08-28":0,"2026-08-29":0,"2026-08-30":0,"2026-08-31":0},
-        {"account":"d21711ae11a362bc4d57d4fd48deae61","service":"oc-whatsapp","platform":"worker","kind":"worker","daily":{"2026-08-27":0,"2026-08-28":0,"2026-08-29":3,"2026-08-30":0,"2026-08-31":0},
-        {"account":"d21711ae11a362bc4d57d4fd48deae61","service":"youstream-proxy","platform":"worker","kind":"worker","daily":{"2026-08-06":0,"2026-08-07":0,"2026-08-08":0,"2026-08-09":0,"2026-08-10":0,"2026-08-11":0,"2026-08-12":0,"2026-08-13":0,"2026-08-14":0,"2026-08-15":0,"2026-08-16":0,"2026-08-17":0,"2026-08-18":0,"2026-08-19":0,"2026-08-20":0,"2026-08-21":0,"2026-08-22":0,"2026-08-23":0,"2026-08-24":0,"2026-08-25":0,"2026-08-26":0,"2026-08-27":0,"2026-08-28":0,"2026-08-29":0,"2026-08-30":0,"2026-08-31":0},
-        {"account":"d21711ae11a362bc4d57d4fd48deae61","service":"egress-probe","platform":"worker","kind":"worker","daily":{"2026-08-12":0,"2026-08-13":0,"2026-08-14":0,"2026-08-15":0,"2026-08-16":0,"2026-08-17":0,"2026-08-18":0,"2026-08-19":0,"2026-08-20":0,"2026-08-21":0,"2026-08-22":0,"2026-08-23":0,"2026-08-24":0,"2026-08-25":0,"2026-08-26":0,"2026-08-27":0,"2026-08-28":0,"2026-08-29":0,"2026-08-30":0,"2026-08-31":0}
-      ]
-    };
+        <footer>
+            Generated by big-pickle · <span id="updated-at"></span> · Data: Cloudflare GraphQL Analytics
+        </footer>
+    </div>
 
-    const services = rawData.services;
-    const updatedAt = rawData.updatedAt;
+    <script>
+        const data = {
+            "updatedAt": "2026-09-01T10:36:51.423Z",
+            "services": [
+                {
+                    "account": "d21711ae11a362bc4d57d4fd48deae61",
+                    "service": "stickman-rumble",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-07": 0, "2026-08-08": 11363, "2026-08-09": 15390, "2026-08-10": 15551, "2026-08-11": 9896,
+                        "2026-08-12": 41927, "2026-08-13": 10413, "2026-08-14": 9163, "2026-08-15": 13084, "2026-08-16": 5462,
+                        "2026-08-17": 15253, "2026-08-18": 13255, "2026-08-19": 1619, "2026-08-20": 4271, "2026-08-21": 12343,
+                        "2026-08-22": 9461, "2026-08-23": 1354, "2026-08-24": 18809, "2026-08-25": 4875, "2026-08-26": 11095,
+                        "2026-08-27": 1755, "2026-08-28": 4338, "2026-08-29": 36500, "2026-08-30": 12820, "2026-08-31": 19412,
+                        "2026-09-01": 0
+                    }
+                },
+                {
+                    "account": "d21711ae11a362bc4d57d4fd48deae61",
+                    "service": "trivia-rumble-elite",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-06": 0, "2026-08-07": 145, "2026-08-08": 19286, "2026-08-09": 6451, "2026-08-10": 10719,
+                        "2026-08-11": 7995, "2026-08-12": 23342, "2026-08-13": 13146, "2026-08-14": 9397, "2026-08-15": 14238,
+                        "2026-08-16": 13467, "2026-08-17": 12453, "2026-08-18": 11318, "2026-08-19": 864, "2026-08-20": 9266,
+                        "2026-08-21": 5850, "2026-08-22": 33061, "2026-08-23": 8357, "2026-08-24": 15812, "2026-08-25": 8397,
+                        "2026-08-26": 11078, "2026-08-27": 6566, "2026-08-28": 12640, "2026-08-29": 9835, "2026-08-30": 3500,
+                        "2026-08-31": 13303, "2026-09-01": 5551
+                    }
+                },
+                {
+                    "account": "d21711ae11a362bc4d57d4fd48deae61",
+                    "service": "bible-songs",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-07": 0, "2026-08-08": 2292, "2026-08-09": 3849, "2026-08-10": 29523, "2026-08-11": 31581,
+                        "2026-08-12": 20747, "2026-08-13": 3695, "2026-08-14": 612, "2026-08-15": 1267, "2026-08-16": 9582,
+                        "2026-08-17": 169, "2026-08-18": 20714, "2026-08-19": 17345, "2026-08-20": 25443, "2026-08-21": 17598,
+                        "2026-08-22": 31698, "2026-08-23": 1945, "2026-08-24": 946, "2026-08-25": 786, "2026-08-26": 498,
+                        "2026-08-27": 548, "2026-08-28": 9936, "2026-08-29": 26176, "2026-08-30": 6316, "2026-08-31": 3703,
+                        "2026-09-01": 6255
+                    }
+                },
+                {
+                    "account": "2b4b9a55f950042b9f9bcea76eb24b08",
+                    "service": "snakeworld1",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-06": 8137, "2026-08-07": 4, "2026-08-08": 3955, "2026-08-09": 2674, "2026-08-10": 9955,
+                        "2026-08-11": 4053, "2026-08-12": 713, "2026-08-13": 7691, "2026-08-14": 0, "2026-08-15": 2035,
+                        "2026-08-16": 486, "2026-08-17": 0, "2026-08-18": 0, "2026-08-19": 4, "2026-08-20": 304,
+                        "2026-08-21": 0, "2026-08-22": 12501, "2026-08-23": 1979, "2026-08-24": 1, "2026-08-25": 0,
+                        "2026-08-26": 0, "2026-08-27": 1145, "2026-08-28": 47912, "2026-08-29": 11717, "2026-08-30": 29803,
+                        "2026-08-31": 28407, "2026-09-01": 7
+                    }
+                },
+                {
+                    "account": "d21711ae11a362bc4d57d4fd48deae61",
+                    "service": "english-trivia",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-07": 0, "2026-08-08": 8747, "2026-08-09": 5546, "2026-08-10": 3093, "2026-08-11": 7904,
+                        "2026-08-12": 3962, "2026-08-13": 4419, "2026-08-14": 6537, "2026-08-15": 5287, "2026-08-16": 8126,
+                        "2026-08-17": 17479, "2026-08-18": 4455, "2026-08-19": 11356, "2026-08-20": 5816, "2026-08-21": 8904,
+                        "2026-08-22": 9198, "2026-08-23": 9764, "2026-08-24": 6883, "2026-08-25": 3340, "2026-08-26": 11041,
+                        "2026-08-27": 8231, "2026-08-28": 5942, "2026-08-29": 4410, "2026-08-30": 2185, "2026-08-31": 3670,
+                        "2026-09-01": 6220
+                    }
+                },
+                {
+                    "account": "d21711ae11a362bc4d57d4fd48deae61",
+                    "service": "bible-trivia",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 2079, "2026-08-09": 5354, "2026-08-10": 6225,
+                        "2026-08-11": 1974, "2026-08-12": 1129, "2026-08-13": 7152, "2026-08-14": 2857, "2026-08-15": 14880,
+                        "2026-08-16": 4009, "2026-08-17": 9053, "2026-08-18": 15350, "2026-08-19": 1442, "2026-08-20": 5959,
+                        "2026-08-21": 5148, "2026-08-22": 2546, "2026-08-23": 1904, "2026-08-24": 3183, "2026-08-25": 6090,
+                        "2026-08-26": 9095, "2026-08-27": 1374, "2026-08-28": 3908, "2026-08-29": 3070, "2026-08-30": 706,
+                        "2026-08-31": 6259, "2026-09-01": 652
+                    }
+                },
+                {
+                    "account": "d21711ae11a362bc4d57d4fd48deae61",
+                    "service": "islamic-trivia",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 6912, "2026-08-11": 4756, "2026-08-12": 4829,
+                        "2026-08-13": 14552, "2026-08-14": 13974, "2026-08-15": 14178, "2026-08-16": 7520, "2026-08-17": 1739,
+                        "2026-08-18": 1082, "2026-08-19": 1275, "2026-08-20": 1136, "2026-08-21": 2507, "2026-08-22": 1254,
+                        "2026-08-23": 1444, "2026-08-24": 1201, "2026-08-25": 751, "2026-08-26": 2337, "2026-08-27": 890,
+                        "2026-08-28": 2293, "2026-08-29": 3812, "2026-08-30": 889, "2026-08-31": 305, "2026-09-01": 639
+                    }
+                },
+                {
+                    "account": "d21711ae11a362bc4d57d4fd48deae61",
+                    "service": "quran-trivia",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 3043, "2026-08-09": 5531, "2026-08-10": 6151,
+                        "2026-08-11": 453, "2026-08-12": 597, "2026-08-13": 2033, "2026-08-14": 2305, "2026-08-15": 3291,
+                        "2026-08-16": 3358, "2026-08-17": 250, "2026-08-18": 312, "2026-08-19": 340, "2026-08-20": 57,
+                        "2026-08-21": 111, "2026-08-22": 92, "2026-08-23": 135, "2026-08-24": 148, "2026-08-25": 141,
+                        "2026-08-26": 163, "2026-08-27": 50, "2026-08-28": 44, "2026-08-29": 128, "2026-08-30": 57,
+                        "2026-08-31": 38, "2026-09-01": 239
+                    }
+                },
+                {
+                    "account": "2b4b9a55f950042b9f9bcea76eb24b08",
+                    "service": "arrow-blast",
+                    "platform": "pages",
+                    "kind": "pages",
+                    "daily": {
+                        "2026-08-06": 5988, "2026-08-07": 846, "2026-08-08": 517, "2026-08-09": 209, "2026-08-10": 272,
+                        "2026-08-11": 266, "2026-08-12": 706, "2026-08-13": 55, "2026-08-14": 1512, "2026-08-15": 587,
+                        "2026-08-16": 3, "2026-08-17": 541, "2026-08-18": 631, "2026-08-19": 197, "2026-08-20": 59,
+                        "2026-08-21": 1493, "2026-08-22": 281, "2026-08-23": 276, "2026-08-24": 381, "2026-08-25": 36,
+                        "2026-08-26": 7, "2026-08-27": 1298, "2026-08-28": 202, "2026-08-29": 120, "2026-08-30": 9343,
+                        "2026-08-31": 268, "2026-09-01": 3
+                    }
+                },
+                {
+                    "account": "d21711ae11a362bc4d57d4fd48deae61",
+                    "service": "dice-arena",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-06": 782, "2026-08-07": 908, "2026-08-08": 2287, "2026-08-09": 402, "2026-08-10": 360,
+                        "2026-08-11": 492, "2026-08-12": 593, "2026-08-13": 697, "2026-08-14": 434, "2026-08-15": 1237,
+                        "2026-08-16": 355, "2026-08-17": 814, "2026-08-18": 357, "2026-08-19": 338, "2026-08-20": 398,
+                        "2026-08-21": 681, "2026-08-22": 543, "2026-08-23": 1247, "2026-08-24": 337, "2026-08-25": 2567,
+                        "2026-08-26": 335, "2026-08-27": 377, "2026-08-28": 750, "2026-08-29": 374, "2026-08-30": 709,
+                        "2026-08-31": 272, "2026-09-01": 140
+                    }
+                },
+                {
+                    "account": "2b4b9a55f950042b9f9bcea76eb24b08",
+                    "service": "pop-party",
+                    "platform": "pages",
+                    "kind": "pages",
+                    "daily": {
+                        "2026-08-06": 3145, "2026-08-07": 9, "2026-08-08": 176, "2026-08-09": 90, "2026-08-10": 145,
+                        "2026-08-11": 14, "2026-08-12": 115, "2026-08-13": 18, "2026-08-14": 314, "2026-08-15": 1187,
+                        "2026-08-16": 826, "2026-08-17": 1824, "2026-08-18": 57, "2026-08-19": 258, "2026-08-20": 50,
+                        "2026-08-21": 725, "2026-08-22": 1926, "2026-08-23": 694, "2026-08-24": 48, "2026-08-25": 62,
+                        "2026-08-26": 269, "2026-08-27": 34, "2026-08-28": 459, "2026-08-29": 1231, "2026-08-30": 1407,
+                        "2026-08-31": 692, "2026-09-01": 540
+                    }
+                },
+                {
+                    "account": "d21711ae11a362bc4d57d4fd48deae61",
+                    "service": "brick-breaker",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-08": 0, "2026-08-09": 566, "2026-08-10": 33, "2026-08-11": 193, "2026-08-12": 2196,
+                        "2026-08-13": 225, "2026-08-14": 23, "2026-08-15": 401, "2026-08-16": 137, "2026-08-17": 323,
+                        "2026-08-18": 0, "2026-08-19": 2, "2026-08-20": 604, "2026-08-21": 66, "2026-08-22": 1,
+                        "2026-08-23": 33, "2026-08-24": 52, "2026-08-25": 0, "2026-08-26": 30, "2026-08-27": 1,
+                        "2026-08-28": 3, "2026-08-29": 475, "2026-08-30": 1, "2026-08-31": 63, "2026-09-01": 0
+                    }
+                },
+                {
+                    "account": "2b4b9a55f950042b9f9bcea76eb24b08",
+                    "service": "discord-activity-test",
+                    "platform": "pages",
+                    "kind": "pages",
+                    "daily": {
+                        "2026-08-06": 2373, "2026-08-07": 160, "2026-08-08": 42, "2026-08-09": 284, "2026-08-10": 92,
+                        "2026-08-11": 277, "2026-08-12": 169, "2026-08-13": 191, "2026-08-14": 2, "2026-08-15": 122,
+                        "2026-08-16": 3, "2026-08-17": 78, "2026-08-18": 154, "2026-08-19": 12, "2026-08-20": 21,
+                        "2026-08-21": 48, "2026-08-22": 120, "2026-08-23": 17, "2026-08-24": 112, "2026-08-25": 10,
+                        "2026-08-26": 33, "2026-08-27": 24, "2026-08-28": 71, "2026-08-29": 117, "2026-08-30": 5,
+                        "2026-08-31": 31, "2026-09-01": 17
+                    }
+                },
+                {
+                    "account": "d21711ae11a362bc4d57d4fd48deae61",
+                    "service": "bluff-dice",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-06": 111, "2026-08-07": 238, "2026-08-08": 21, "2026-08-09": 209, "2026-08-10": 25,
+                        "2026-08-11": 5, "2026-08-12": 248, "2026-08-13": 26, "2026-08-14": 83, "2026-08-15": 318,
+                        "2026-08-16": 67, "2026-08-17": 276, "2026-08-18": 14, "2026-08-19": 67, "2026-08-20": 0,
+                        "2026-08-21": 16, "2026-08-22": 47, "2026-08-23": 187, "2026-08-24": 0, "2026-08-25": 96,
+                        "2026-08-26": 64, "2026-08-27": 4, "2026-08-28": 127, "2026-08-29": 18, "2026-08-30": 20,
+                        "2026-08-31": 8, "2026-09-01": 0
+                    }
+                },
+                {
+                    "account": "d21711ae11a362bc4d57d4fd48deae61",
+                    "service": "memory-cascade",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-26": 0, "2026-08-27": 0, "2026-08-28": 234, "2026-08-29": 285, "2026-08-30": 306,
+                        "2026-08-31": 273, "2026-09-01": 122
+                    }
+                },
+                {
+                    "account": "2b4b9a55f950042b9f9bcea76eb24b08",
+                    "service": "voice-vibes",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0,
+                        "2026-08-11": 797, "2026-08-12": 0, "2026-08-13": 0, "2026-08-14": 0, "2026-08-15": 0,
+                        "2026-08-16": 0, "2026-08-17": 0, "2026-08-18": 0, "2026-08-19": 0, "2026-08-20": 0,
+                        "2026-08-21": 0, "2026-08-22": 0, "2026-08-23": 0, "2026-08-24": 0, "2026-08-25": 0,
+                        "2026-08-26": 0, "2026-08-27": 0, "2026-08-28": 0, "2026-08-29": 0, "2026-08-30": 0,
+                        "2026-08-31": 0, "2026-09-01": 0
+                    }
+                },
+                {
+                    "account": "d21711ae11a362bc4d57d4fd48deae61",
+                    "service": "repo-task-keeper",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-16": 0, "2026-08-17": 71, "2026-08-18": 16, "2026-08-19": 17, "2026-08-20": 6,
+                        "2026-08-21": 0, "2026-08-22": 0, "2026-08-23": 7, "2026-08-24": 4, "2026-08-25": 1,
+                        "2026-08-26": 0, "2026-08-27": 0, "2026-08-28": 0, "2026-08-29": 1, "2026-08-30": 0,
+                        "2026-08-31": 0, "2026-09-01": 0
+                    }
+                },
+                {
+                    "account": "d21711ae11a362bc4d57d4fd48deae61",
+                    "service": "tiktok-reels",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-12": 0, "2026-08-13": 0, "2026-08-14": 56, "2026-08-15": 0, "2026-08-16": 0,
+                        "2026-08-17": 0, "2026-08-18": 0, "2026-08-19": 0, "2026-08-20": 6, "2026-08-21": 1,
+                        "2026-08-22": 3, "2026-08-23": 1, "2026-08-24": 1, "2026-08-25": 10, "2026-08-26": 1,
+                        "2026-08-27": 3, "2026-08-28": 1, "2026-08-29": 3, "2026-08-30": 1, "2026-08-31": 1,
+                        "2026-09-01": 1
+                    }
+                },
+                {
+                    "account": "d21711ae11a362bc4d57d4fd48deae61",
+                    "service": "oc-chat",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-27": 0, "2026-08-28": 0, "2026-08-29": 54, "2026-08-30": 0, "2026-08-31": 0,
+                        "2026-09-01": 7
+                    }
+                },
+                {
+                    "account": "2b4b9a55f950042b9f9bcea76eb24b08",
+                    "service": "youtrivia",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-06": 0, "2026-08-07": 7, "2026-08-08": 8, "2026-08-09": 2, "2026-08-10": 4,
+                        "2026-08-11": 3, "2026-08-12": 3, "2026-08-13": 0, "2026-08-14": 1, "2026-08-15": 5,
+                        "2026-08-16": 2, "2026-08-17": 1, "2026-08-18": 0, "2026-08-19": 2, "2026-08-20": 1,
+                        "2026-08-21": 2, "2026-08-22": 4, "2026-08-23": 1, "2026-08-24": 1, "2026-08-25": 3,
+                        "2026-08-26": 0, "2026-08-27": 0, "2026-08-28": 0, "2026-08-29": 6, "2026-08-30": 1,
+                        "2026-08-31": 1, "2026-09-01": 1
+                    }
+                },
+                {
+                    "account": "d21711ae11a362bc4d57d4fd48deae61",
+                    "service": "opencode-proxy",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-06": 0, "2026-08-07": 12, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0,
+                        "2026-08-11": 0, "2026-08-12": 1, "2026-08-13": 0, "2026-08-14": 0, "2026-08-15": 0,
+                        "2026-08-16": 0, "2026-08-17": 0, "2026-08-18": 0, "2026-08-19": 0, "2026-08-20": 6,
+                        "2026-08-21": 0, "2026-08-22": 0, "2026-08-23": 0, "2026-08-24": 0, "2026-08-25": 0,
+                        "2026-08-26": 0, "2026-08-27": 0, "2026-08-28": 0, "2026-08-29": 0, "2026-08-30": 0,
+                        "2026-08-31": 0, "2026-09-01": 0
+                    }
+                },
+                {
+                    "account": "d21711ae11a362bc4d57d4fd48deae61",
+                    "service": "audiobooks",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 2,
+                        "2026-08-11": 0, "2026-08-12": 0, "2026-08-13": 0, "2026-08-14": 0, "2026-08-15": 8,
+                        "2026-08-16": 0, "2026-08-17": 0, "2026-08-18": 0, "2026-08-19": 0, "2026-08-20": 0,
+                        "2026-08-21": 0, "2026-08-22": 0, "2026-08-23": 0, "2026-08-24": 0, "2026-08-25": 0,
+                        "2026-08-26": 0, "2026-08-27": 1, "2026-08-28": 0, "2026-08-29": 0, "2026-08-30": 0,
+                        "2026-08-31": 1, "2026-09-01": 0
+                    }
+                },
+                {
+                    "account": "d21711ae11a362bc4d57d4fd48deae61",
+                    "service": "oc-whatsapp",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-27": 0, "2026-08-28": 0, "2026-08-29": 3, "2026-08-30": 0, "2026-08-31": 0,
+                        "2026-09-01": 0
+                    }
+                },
+                {
+                    "account": "d21711ae11a362bc4d57d4fd48deae61",
+                    "service": "youstream-proxy",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0,
+                        "2026-08-11": 0, "2026-08-12": 0, "2026-08-13": 0, "2026-08-14": 0, "2026-08-15": 0,
+                        "2026-08-16": 0, "2026-08-17": 0, "2026-08-18": 0, "2026-08-19": 0, "2026-08-20": 0,
+                        "2026-08-21": 0, "2026-08-22": 0, "2026-08-23": 0, "2026-08-24": 0, "2026-08-25": 0,
+                        "2026-08-26": 0, "2026-08-27": 0, "2026-08-28": 0, "2026-08-29": 0, "2026-08-30": 0,
+                        "2026-08-31": 0, "2026-09-01": 0
+                    }
+                },
+                {
+                    "account": "d21711ae11a362bc4d57d4fd48deae61",
+                    "service": "egress-probe",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-12": 0, "2026-08-13": 0, "2026-08-14": 0, "2026-08-15": 0, "2026-08-16": 0,
+                        "2026-08-17": 0, "2026-08-18": 0, "2026-08-19": 0, "2026-08-20": 0, "2026-08-21": 0,
+                        "2026-08-22": 0, "2026-08-23": 0, "2026-08-24": 0, "2026-08-25": 0, "2026-08-26": 0,
+                        "2026-08-27": 0, "2026-08-28": 0, "2026-08-29": 0, "2026-08-30": 0, "2026-08-31": 0,
+                        "2026-09-01": 0
+                    }
+                },
+                {
+                    "account": "d21711ae11a362bc4d57d4fd48deae61",
+                    "service": "odespace-3",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-16": 0, "2026-08-17": 0, "2026-08-18": 0, "2026-08-19": 0, "2026-08-20": 0,
+                        "2026-08-21": 0, "2026-08-22": 0, "2026-08-23": 0, "2026-08-24": 0, "2026-08-25": 0,
+                        "2026-08-26": 0, "2026-08-27": 0, "2026-08-28": 0, "2026-08-29": 0, "2026-08-30": 0,
+                        "2026-08-31": 0, "2026-09-01": 0
+                    }
+                },
+                {
+                    "account": "2b4b9a55f950042b9f9bcea76eb24b08",
+                    "service": "bible-game-telegram",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0,
+                        "2026-08-11": 0, "2026-08-12": 0, "2026-08-13": 0, "2026-08-14": 0, "2026-08-15": 0,
+                        "2026-08-16": 0, "2026-08-17": 0, "2026-08-18": 0, "2026-08-19": 0, "2026-08-20": 0,
+                        "2026-08-21": 0, "2026-08-22": 0, "2026-08-23": 0, "2026-08-24": 0, "2026-08-25": 0,
+                        "2026-08-26": 0, "2026-08-27": 0, "2026-08-28": 0, "2026-08-29": 0, "2026-08-30": 0,
+                        "2026-08-31": 0, "2026-09-01": 0
+                    }
+                },
+                {
+                    "account": "2b4b9a55f950042b9f9bcea76eb24b08",
+                    "service": "casino",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0,
+                        "2026-08-11": 0, "2026-08-12": 0, "2026-08-13": 0, "2026-08-14": 0, "2026-08-15": 0,
+                        "2026-08-16": 0, "2026-08-17": 0, "2026-08-18": 0, "2026-08-19": 0, "2026-08-20": 0,
+                        "2026-08-21": 0, "2026-08-22": 0, "2026-08-23": 0, "2026-08-24": 0, "2026-08-25": 0,
+                        "2026-08-26": 0, "2026-08-27": 0, "2026-08-28": 0, "2026-08-29": 0, "2026-08-30": 0,
+                        "2026-08-31": 0, "2026-09-01": 0
+                    }
+                },
+                {
+                    "account": "2b4b9a55f950042b9f9bcea76eb24b08",
+                    "service": "pop-party",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0,
+                        "2026-08-11": 0, "2026-08-12": 0, "2026-08-13": 0, "2026-08-14": 0, "2026-08-15": 0,
+                        "2026-08-16": 0, "2026-08-17": 0, "2026-08-18": 0, "2026-08-19": 0, "2026-08-20": 0,
+                        "2026-08-21": 0, "2026-08-22": 0, "2026-08-23": 0, "2026-08-24": 0, "2026-08-25": 0,
+                        "2026-08-26": 0, "2026-08-27": 0, "2026-08-28": 0, "2026-08-29": 0, "2026-08-30": 0,
+                        "2026-08-31": 0, "2026-09-01": 0
+                    }
+                },
+                {
+                    "account": "2b4b9a55f950042b9f9bcea76eb24b08",
+                    "service": "pop-the-balloon",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0,
+                        "2026-08-11": 0, "2026-08-12": 0, "2026-08-13": 0, "2026-08-14": 0, "2026-08-15": 0,
+                        "2026-08-16": 0, "2026-08-17": 0, "2026-08-18": 0, "2026-08-19": 0, "2026-08-20": 0,
+                        "2026-08-21": 0, "2026-08-22": 0, "2026-08-23": 0, "2026-08-24": 0, "2026-08-25": 0,
+                        "2026-08-26": 0, "2026-08-27": 0, "2026-08-28": 0, "2026-08-29": 0, "2026-08-30": 0,
+                        "2026-08-31": 0, "2026-09-01": 0
+                    }
+                },
+                {
+                    "account": "2b4b9a55f950042b9f9bcea76eb24b08",
+                    "service": "snakeworld1-telegram-bot",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0,
+                        "2026-08-11": 0, "2026-08-12": 0, "2026-08-13": 0, "2026-08-14": 0, "2026-08-15": 0,
+                        "2026-08-16": 0, "2026-08-17": 0, "2026-08-18": 0, "2026-08-19": 0, "2026-08-20": 0,
+                        "2026-08-21": 0, "2026-08-22": 0, "2026-08-23": 0, "2026-08-24": 0, "2026-08-25": 0,
+                        "2026-08-26": 0, "2026-08-27": 0, "2026-08-28": 0, "2026-08-29": 0, "2026-08-30": 0,
+                        "2026-08-31": 0, "2026-09-01": 0
+                    }
+                },
+                {
+                    "account": "2b4b9a55f950042b9f9bcea76eb24b08",
+                    "service": "trivia-rumble-3",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0,
+                        "2026-08-11": 0, "2026-08-12": 0, "2026-08-13": 0, "2026-08-14": 0, "2026-08-15": 0,
+                        "2026-08-16": 0, "2026-08-17": 0, "2026-08-18": 0, "2026-08-19": 0, "2026-08-20": 0,
+                        "2026-08-21": 0, "2026-08-22": 0, "2026-08-23": 0, "2026-08-24": 0, "2026-08-25": 0,
+                        "2026-08-26": 0, "2026-08-27": 0, "2026-08-28": 0, "2026-08-29": 0, "2026-08-30": 0,
+                        "2026-08-31": 0, "2026-09-01": 0
+                    }
+                },
+                {
+                    "account": "2b4b9a55f950042b9f9bcea76eb24b08",
+                    "service": "wstest-probe2",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0,
+                        "2026-08-11": 0, "2026-08-12": 0, "2026-08-13": 0, "2026-08-14": 0, "2026-08-15": 0,
+                        "2026-08-16": 0, "2026-08-17": 0, "2026-08-18": 0, "2026-08-19": 0, "2026-08-20": 0,
+                        "2026-08-21": 0, "2026-08-22": 0, "2026-08-23": 0, "2026-08-24": 0, "2026-08-25": 0,
+                        "2026-08-26": 0, "2026-08-27": 0, "2026-08-28": 0, "2026-08-29": 0, "2026-08-30": 0,
+                        "2026-08-31": 0, "2026-09-01": 0
+                    }
+                },
+                {
+                    "account": "2b4b9a55f950042b9f9bcea76eb24b08",
+                    "service": "bible-game",
+                    "platform": "pages",
+                    "kind": "pages",
+                    "daily": {
+                        "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0,
+                        "2026-08-11": 0, "2026-08-12": 0, "2026-08-13": 0, "2026-08-14": 0, "2026-08-15": 0,
+                        "2026-08-16": 0, "2026-08-17": 0, "2026-08-18": 0, "2026-08-19": 0, "2026-08-20": 0,
+                        "2026-08-21": 0, "2026-08-22": 0, "2026-08-23": 0, "2026-08-24": 0, "2026-08-25": 0,
+                        "2026-08-26": 0, "2026-08-27": 0, "2026-08-28": 0, "2026-08-29": 0, "2026-08-30": 0,
+                        "2026-08-31": 0, "2026-09-01": 0
+                    }
+                },
+                {
+                    "account": "2b4b9a55f950042b9f9bcea76eb24b08",
+                    "service": "casino",
+                    "platform": "pages",
+                    "kind": "pages",
+                    "daily": {
+                        "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0,
+                        "2026-08-11": 0, "2026-08-12": 0, "2026-08-13": 0, "2026-08-14": 0, "2026-08-15": 0,
+                        "2026-08-16": 0, "2026-08-17": 0, "2026-08-18": 0, "2026-08-19": 0, "2026-08-20": 0,
+                        "2026-08-21": 0, "2026-08-22": 0, "2026-08-23": 0, "2026-08-24": 0, "2026-08-25": 0,
+                        "2026-08-26": 0, "2026-08-27": 0, "2026-08-28": 0, "2026-08-29": 0, "2026-08-30": 0,
+                        "2026-08-31": 0, "2026-09-01": 0
+                    }
+                },
+                {
+                    "account": "2b4b9a55f950042b9f9bcea76eb24b08",
+                    "service": "voice-vibes",
+                    "platform": "pages",
+                    "kind": "pages",
+                    "daily": {
+                        "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0,
+                        "2026-08-11": 0, "2026-08-12": 0, "2026-08-13": 0, "2026-08-14": 0, "2026-08-15": 0,
+                        "2026-08-16": 0, "2026-08-17": 0, "2026-08-18": 0, "2026-08-19": 0, "2026-08-20": 0,
+                        "2026-08-21": 0, "2026-08-22": 0, "2026-08-23": 0, "2026-08-24": 0, "2026-08-25": 0,
+                        "2026-08-26": 0, "2026-08-27": 0, "2026-08-28": 0, "2026-08-29": 0, "2026-08-30": 0,
+                        "2026-08-31": 0, "2026-09-01": 0
+                    }
+                },
+                {
+                    "account": "2b4b9a55f950042b9f9bcea76eb24b08",
+                    "service": "hindsight",
+                    "platform": "pages",
+                    "kind": "pages",
+                    "daily": {
+                        "2026-08-06": 0, "2026-08-07": 0, "2026-08-08": 0, "2026-08-09": 0, "2026-08-10": 0,
+                        "2026-08-11": 0, "2026-08-12": 0, "2026-08-13": 0, "2026-08-14": 0, "2026-08-15": 0,
+                        "2026-08-16": 0, "2026-08-17": 0, "2026-08-18": 0, "2026-08-19": 0, "2026-08-20": 0,
+                        "2026-08-21": 0, "2026-08-22": 0, "2026-08-23": 0, "2026-08-24": 0, "2026-08-25": 0,
+                        "2026-08-26": 0, "2026-08-27": 0, "2026-08-28": 0, "2026-08-29": 0, "2026-08-30": 0,
+                        "2026-08-31": 0, "2026-09-01": 0
+                    }
+                },
+                {
+                    "account": "2b4b9a55f950042b9f9bcea76eb24b08",
+                    "service": "egress-probe",
+                    "platform": "worker",
+                    "kind": "worker",
+                    "daily": {
+                        "2026-08-12": 0, "2026-08-13": 0, "2026-08-14": 0, "2026-08-15": 0, "2026-08-16": 0,
+                        "2026-08-17": 0, "2026-08-18": 0, "2026-08-19": 0, "2026-08-20": 0, "2026-08-21": 0,
+                        "2026-08-22": 0, "2026-08-23": 0, "2026-08-24": 0, "2026-08-25": 0, "2026-08-26": 0,
+                        "2026-08-27": 0, "2026-08-28": 0, "2026-08-29": 0, "2026-08-30": 0, "2026-08-31": 0,
+                        "2026-09-01": 0
+                    }
+                }
+            ]
+        };
 
-    // collect all dates
-    const dateSet = new Set();
-    services.forEach(s => Object.keys(s.daily).forEach(d => dateSet.add(d)));
-    const allDates = Array.from(dateSet).sort(); // lexicographic works for YYYY-MM-DD
-    const lastDate = allDates[allDates.length - 1];
-    const prevDate = allDates[allDates.length - 2];
+        // Helper functions
+        function formatNumber(num) {
+            return num.toLocaleString('en-US');
+        }
 
-    // enrich service with total
-    const enriched = services.map(s => {
-      let total = 0;
-      allDates.forEach(d => {
-        total += (s.daily[d] || 0);
-      });
-      return { ...s, total };
-    });
+        function getTotal(daily) {
+            return Object.values(daily).reduce((sum, val) => sum + val, 0);
+        }
 
-    // determine game vs infra
-    const gameKeywords = ['trivia', 'bible', 'quran', 'dice', 'bluff', 'snake', 'pop', 'casino', 'voice', 'youtrivia', 'rumble', 'stickman', 'arrow', 'brick', 'memory', 'balloon'];
-    function isGameService(s) {
-      const name = s.service.toLowerCase();
-      return gameKeywords.some(k => name.includes(k));
-    }
+        function getLastDay(daily) {
+            const dates = Object.keys(daily).sort();
+            if (dates.length === 0) return 0;
+            return daily[dates[dates.length - 1]];
+        }
 
-    // last day total
-    const lastDayTotal = enriched.reduce((acc, s) => acc + (s.daily[lastDate] || 0), 0);
-    const allTimeTotal = enriched.reduce((acc, s) => acc + s.total, 0);
-    const serviceCount = enriched.length;
-    const topService = enriched.reduce((a, b) => a.total > b.total ? a : b);
+        function getPreviousDay(daily) {
+            const dates = Object.keys(daily).sort();
+            if (dates.length < 2) return 0;
+            return daily[dates[dates.length - 2]];
+        }
 
-    // trend calculation for each service (last two dates)
-    const trendMap = {};
-    enriched.forEach(s => {
-      const lastVal = s.daily[lastDate] || 0;
-      const prevVal = s.daily[prevDate] || 0;
-      trendMap[s.service] = { lastVal, prevVal, diff: lastVal - prevVal };
-    });
+        function getTrend(daily) {
+            const last = getLastDay(daily);
+            const prev = getPreviousDay(daily);
+            if (last > prev) return 'up';
+            if (last < prev) return 'down';
+            return 'flat';
+        }
 
-    // build table rows
-    const tbodyRows = enriched.map(s => {
-      const isGame = isGameService(s);
-      const rowClass = isGame ? 'game-badge' : 'infra-row';
-      const serviceDisplay = isGame ? `🎮 ${s.service}` : `${s.service} (infra)`;
-      const trend = trendMap[s.service];
-      let trendHtml = '<span class="trend-flat">—</span>';
-      if (prevDate && trend) {
-        const diff = trend.diff;
-        if (diff > 0) trendHtml = `<span class="trend-up">▲ ${diff.toLocaleString()}</span>`;
-        else if (diff < 0) trendHtml = `<span class="trend-down">▼ ${Math.abs(diff).toLocaleString()}</span>`;
-        else trendHtml = `<span class="trend-flat">0</span>`;
-      }
-      let dateCells = '';
-      allDates.forEach(d => {
-        const val = s.daily[d] || 0;
-        dateCells += `<td>${val.toLocaleString()}</td>`;
-      });
-      return `<tr class="${rowClass}">
-        <td><div class="service-name">${serviceDisplay}</div></td>
-        <td>${s.account.slice(0,8)}…</td>
-        <td>${s.platform}</td>
-        ${dateCells}
-        <td class="total-cell">${s.total.toLocaleString()}</td>
-        <td>${trendHtml}</td>
-      </tr>`;
-    }).join('');
+        function isGame(service) {
+            const name = service.service.toLowerCase();
+            const gameKeywords = ['trivia', 'bible', 'quran', 'dice', 'bluff', 'snake', 'pop', 'casino', 'voice', 'youtrivia', 'rumble', 'stickman', 'arrow', 'brick', 'memory', 'balloon', 'game'];
+            return gameKeywords.some(keyword => name.includes(keyword));
+        }
 
-    // header dates
-    let dateHeaders = allDates.map(d => `<th>${d.slice(5)}</th>`).join('');
+        // Process data
+        const services = data.services;
+        const allDates = new Set();
+        services.forEach(s => Object.keys(s.daily).forEach(d => allDates.add(d)));
+        const sortedDates = Array.from(allDates).sort();
 
-    // bar chart data (top 8 by total)
-    const sortedForBar = [...enriched].sort((a,b) => b.total - a.total).slice(0,8);
-    const maxTotal = sortedForBar[0]?.total || 1;
-    const barHtml = sortedForBar.map(s => {
-      const width = Math.max(2, (s.total / maxTotal) * 100);
-      return `<div class="bar-row">
-        <div class="bar-label">${s.service}</div>
-        <div class="bar-track"><div class="bar-fill" style="width:${width}%"></div></div>
-        <div class="bar-value">${s.total.toLocaleString()}</div>
-      </div>`;
-    }).join('');
+        // Calculate totals
+        let totalAllTime = 0;
+        let totalLastDay = 0;
+        services.forEach(s => {
+            totalAllTime += getTotal(s.daily);
+            totalLastDay += getLastDay(s.daily);
+        });
 
-    // trending top 3 by growth (diff) between last two days
-    const trending = enriched
-      .filter(s => trendMap[s.service] && prevDate)
-      .map(s => ({ name: s.service, diff: trendMap[s.service].diff }))
-      .sort((a,b) => b.diff - a.diff)
-      .slice(0,3);
+        // Find top service
+        let topService = null;
+        let topTotal = -1;
+        services.forEach(s => {
+            const total = getTotal(s.daily);
+            if (total > topTotal) {
+                topTotal = total;
+                topService = s;
+            }
+        });
 
-    let trendingHtml = '';
-    if (trending.length) {
-      trendingHtml = trending.map(t => {
-        const cls = t.diff >= 0 ? '' : 'negative';
-        return `<div class="trend-item">
-          <div class="service">${t.name}</div>
-          <div class="growth ${cls}">${t.diff >= 0 ? '+' : ''}${t.diff.toLocaleString()}</div>
-        </div>`;
-      }).join('');
-    } else {
-      trendingHtml = '<div class="dim">No trend data</div>';
-    }
+        // Build summary cards
+        const summaryHtml = `
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-label">Requests (Last Day)</div>
+                    <div class="stat-value gold">${formatNumber(totalLastDay)}</div>
+                    <div class="stat-sub">${sortedDates.length > 0 ? sortedDates[sortedDates.length - 1] : 'N/A'}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Requests (All Time)</div>
+                    <div class="stat-value">${formatNumber(totalAllTime)}</div>
+                    <div class="stat-sub">${sortedDates.length} days tracked</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Services Tracked</div>
+                    <div class="stat-value">${services.length}</div>
+                    <div class="stat-sub">${services.filter(s => isGame(s)).length} games · ${services.filter(s => !isGame(s)).length} infra</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Top Service</div>
+                    <div class="stat-value small">${topService ? topService.service : 'N/A'}</div>
+                    <div class="stat-sub">${topService ? formatNumber(topTotal) + ' total requests' : ''}</div>
+                </div>
+            </div>
+        `;
 
-    // check if any data exists
-    const hasData = allTimeTotal > 0;
+        // Build table
+        let tableHtml = `
+            <div class="section-title">📊 Service Breakdown</div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Service</th>
+                            <th>Account</th>
+                            <th>Platform</th>
+                            ${sortedDates.map(d => `<th>${d.slice(5)}</th>`).join('')}
+                            <th>Total</th>
+                            <th>Trend</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
 
-    if (!hasData) {
-      document.getElementById('app').innerHTML = `<div class="no-data">📊 No data collected yet</div>`;
-      return;
-    }
+        services.forEach(s => {
+            const isGameService = isGame(s);
+            const rowClass = isGameService ? 'game-row' : 'infra-row';
+            const total = getTotal(s.daily);
+            const trend = getTrend(s.daily);
+            const trendIcon = trend === 'up' ? '▲' : trend === 'down' ? '▼' : '•';
+            const trendClass = trend === 'up' ? 'trend-up' : trend === 'down' ? 'trend-down' : 'trend-flat';
+            const platformClass = s.platform === 'worker' ? 'platform-worker' : 'platform-pages';
+            
+            tableHtml += `
+                <tr class="${rowClass}">
+                    <td>
+                        <div class="service-name">
+                            <span class="emoji">${isGameService ? '🎮' : '🔧'}</span>
+                            <span>${s.service}</span>
+                        </div>
+                    </td>
+                    <td class="account-cell">${s.account.slice(0, 8)}…</td>
+                    <td><span class="platform-badge ${platformClass}">${s.platform}</span></td>
+                    ${sortedDates.map(d => `<td>${s.daily[d] !== undefined ? formatNumber(s.daily[d]) : '—'}</td>`).join('')}
+                    <td class="total-cell">${formatNumber(total)}</td>
+                    <td class="${trendClass}">${trendIcon}</td>
+                </tr>
+            `;
+        });
 
-    const appHtml = `
-      <div class="cards-grid">
-        <div class="stat-card"><div class="stat-label">Last day (${lastDate})</div><div class="stat-value">${lastDayTotal.toLocaleString()}</div><div class="stat-sub">requests</div></div>
-        <div class="stat-card"><div class="stat-label">All time</div><div class="stat-value">${allTimeTotal.toLocaleString()}</div><div class="stat-sub">total requests</div></div>
-        <div class="stat-card"><div class="stat-label">Services</div><div class="stat-value">${serviceCount}</div><div class="stat-sub">tracked</div></div>
-        <div class="stat-card"><div class="stat-label">Top service</div><div class="stat-value" style="font-size:1.2rem;">${topService.service}</div><div class="stat-sub">${topService.total.toLocaleString()} total</div></div>
-      </div>
+        tableHtml += `
+                    </tbody>
+                </table>
+            </div>
+        `;
 
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr><th>Service</th><th>Account</th><th>Platform</th>${dateHeaders}<th>Total</th><th>Trend</th></tr>
-          </thead>
-          <tbody>${tbodyRows}</tbody>
-        </table>
-      </div>
+        // Build chart
+        const sortedByTotal = [...services].sort((a, b) => getTotal(b.daily) - getTotal(a.daily)).slice(0, 10);
+        const maxTotal = sortedByTotal.length > 0 ? getTotal(sortedByTotal[0].daily) : 1;
 
-      <div class="bar-chart-section">
-        <div class="section-title">📊 Top services by total requests</div>
-        ${barHtml}
-      </div>
+        let chartHtml = `
+            <div class="section-title">🏆 Top Services by Total Requests</div>
+            <div class="chart-container">
+        `;
 
-      <div class="trending-section">
-        <div class="section-title">🔥 Trending (last day vs previous)</div>
-        <div class="trending-grid">${trendingHtml}</div>
-      </div>
+        sortedByTotal.forEach(s => {
+            const total = getTotal(s.daily);
+            const width = Math.max((total / maxTotal) * 100, 2);
+            chartHtml += `
+                <div class="chart-item">
+                    <div class="chart-label">${isGame(s) ? '🎮 ' : '🔧 '}${s.service}</div>
+                    <div class="chart-bar-wrapper">
+                        <div class="chart-bar" style="width: ${width}%"></div>
+                    </div>
+                    <div class="chart-value">${formatNumber(total)}</div>
+                </div>
+            `;
+        });
 
-      <div class="footer">Generated by big-pickle · ${updatedAt} · Data: Cloudflare GraphQL Analytics</div>
-    `;
+        chartHtml += `</div>`;
 
-    document.getElementById('app').innerHTML = appHtml;
-  })();
-</script>
+        // Build trending section
+        const trendingServices = services.filter(s => {
+            const dates = Object.keys(s.daily).sort();
+            return dates.length >= 2;
+        }).map(s => {
+            const dates = Object.keys(s.daily).sort();
+            const lastDate = dates[dates.length - 1];
+            const prevDate = dates[dates.length - 2];
+            const lastVal = s.daily[lastDate];
+            const prevVal = s.daily[prevDate];
+            return {
+                service: s,
+                lastVal,
+                prevVal,
+                change: lastVal - prevVal,
+                lastDate,
+                prevDate
+            };
+        }).sort((a, b) => b.change - a.change).slice(0, 3);
+
+        let trendingHtml = `
+            <div class="section-title">🔥 Trending Services</div>
+            <div class="trending-grid">
+        `;
+
+        trendingServices.forEach((item, index) => {
+            const changeClass = item.change >= 0 ? 'positive' : 'negative';
+            const changeSign = item.change >= 0 ? '+' : '';
+            trendingHtml += `
+                <div class="trending-card">
+                    <div class="trending-rank">#${index + 1} · ${item.change >= 0 ? 'Growth' : 'Decline'}</div>
+                    <div class="trending-name">${isGame(item.service) ? '🎮' : '🔧'} ${item.service.service}</div>
+                    <div class="trending-stats">
+                        <div>
+                            <div style="color: #8a9bb5; font-size: 0.8rem;">${item.prevDate}</div>
+                            <div style="font-weight: 600;">${formatNumber(item.prevVal)}</div>
+                        </div>
+                        <div class="trending-change ${changeClass}">${changeSign}${formatNumber(item.change)}</div>
+                        <div>
+                            <div style="color: #8a9bb5; font-size: 0.8rem;">${item.lastDate}</div>
+                            <div style="font-weight: 600;">${formatNumber(item.lastVal)}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        trendingHtml += `</div>`;
+
+        // Check if there's any data at all
+        const hasAnyData = services.some(s => getTotal(s.daily) > 0);
+
+        let contentHtml;
+        if (hasAnyData) {
+            contentHtml = summaryHtml + tableHtml + chartHtml + trendingHtml;
+        } else {
+            contentHtml = `
+                <div class="no-data">
+                    <span class="emoji">📭</span>
+                    No data collected yet
+                </div>
+            `;
+        }
+
+        // Inject content
+        document.getElementById('dashboard-content').innerHTML = contentHtml;
+        document.getElementById('updated-at').textContent = new Date(data.updatedAt).toLocaleString();
+    </script>
 </body>
 </html>
